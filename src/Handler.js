@@ -48,8 +48,8 @@ export default class Handler {
   setByPathNames(target, pathNames, value, receiver) {
     let pathName = pathNames.pop();
     const remainNames = pathNames;
-    if (pathName === "*") {
-      const indexCount = remainNames.reduce((count, pathName) => count + ((pathName === "*") ? 1 : 0), 0);
+    if (pathName === WILDCARD) {
+      const indexCount = remainNames.reduce((count, pathName) => count + ((pathName === WILDCARD) ? 1 : 0), 0);
       pathName = this.lastIndexes[indexCount];
     }
     if (remainNames.length > 0) {
