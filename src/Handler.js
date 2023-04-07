@@ -73,7 +73,7 @@ export default class Handler {
    */
   get(target, prop, receiver) {
     if (prop.includes(".")) {
-      return this.getByPathNames(target, prop.slice("."), receiver);
+      return this.getByPathNames(target, prop.split("."), receiver);
     }
     return Reflect.get(target, prop, receiver);
   }
@@ -98,7 +98,7 @@ export default class Handler {
    */
   set(target, prop, value, receiver) {
     if (prop.includes(".")) {
-      return this.setByPathNames(target, prop.slice("."), value, receiver);
+      return this.setByPathNames(target, prop.split("."), value, receiver);
     }
    return Reflect.set(target, prop, value, receiver);
   }
