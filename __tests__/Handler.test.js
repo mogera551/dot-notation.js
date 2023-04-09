@@ -528,10 +528,16 @@ test('Handler defined property', () => {
     },
     set "list.*.double"(value) {
       this["list.*.value"] = value / 2;
+    },
+    get "list.*.triple"() {
+      return this["list.*.value"] * 3;
+    },
+    set "list.*.triple"(value) {
+      this["list.*.value"] = value / 3;
     }
   };
   const handler = new Handler([
-    "list", "list.*", "list.*.value", "list.*.double"
+    "list", "list.*", "list.*.value", "list.*.double", "list.*.triple"
   ]);
   const proxy = new Proxy(target, handler);
 
@@ -541,4 +547,7 @@ test('Handler defined property', () => {
 
   handler.set(target, "list.0.double", 100, proxy);
   expect(handler.get(target, "list.0.double", proxy)).toBe(100);
+
+  handler.set(target, "list.0.triple", 300, proxy);
+  expect(handler.get(target, "list.0.triple", proxy)).toBe(300);
 });

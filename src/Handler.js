@@ -1,15 +1,34 @@
 import { PropertyName } from "./PropertyName.js";
 import { SYM_DIRECT } from "./Symbols.js";
 
-
 const WILDCARD = "*";
 const DELIMITER = ".";
 
+/**
+ * @typedef {{propName:PropertyName,match:RegExpMatchArray}} MatchProperty
+ */
+
 export default class Handler {
+  /**
+   * @type {number[][]}
+   */
   stackIndexes = [];
+  /**
+   * @type {string[]|undefined}
+   */
   definedProperties;
+  /**
+   * @type {Set<string>|undefined}
+   */
   setOfDefinedProperties;
+  /**
+   * @type {PropertyName[]|undefined}
+   */
   definedPropertyNames;
+  /**
+   * @type {Map<string,MatchProperty>}
+   */
+  matchByName;
 
   /**
    * 
@@ -19,6 +38,7 @@ export default class Handler {
     this.definedProperties = definedProperties;
     this.setOfDefinedProperties = definedProperties ? new Set(definedProperties) : undefined;
     this.definedPropertyNames = definedProperties ? definedProperties.map(name => PropertyName.create(name)) : undefined;
+    this.matchByName = definedProperties ? new Map : undefined;
   }
 
   get lastIndexes() {
@@ -125,15 +145,22 @@ export default class Handler {
       if (this.setOfDefinedProperties.has(prop)) {
         return this.getByPropertyName(target, PropertyName.create(prop), receiver);
       }
-      for(const propName of this.definedPropertyNames) {
-        const match = propName.regexp.exec(prop);
-        if (!match) continue;
+      const getFunc = ({propName, match}) => {
         this.stackIndexes.push(match.slice(1));
         try {
           return this.getByPropertyName(target, propName, receiver);
         } finally {
           this.stackIndexes.pop();
         }
+      };
+      if (this.matchByName.has(prop)) {
+        return getFunc(this.matchByName.get(prop));
+      }
+      for(const propName of this.definedPropertyNames) {
+        const match = propName.regexp.exec(prop);
+        if (!match) continue;
+        this.matchByName.set(prop, {propName, match});
+        return getFunc({propName, match});
       }
       throw new Error(`undefined property ${prop}`);
     } else {
@@ -167,15 +194,22 @@ export default class Handler {
       if (this.setOfDefinedProperties.has(prop)) {
         return this.setByPropertyName(target, PropertyName.create(prop), value, receiver);
       }
-      for(const propName of this.definedPropertyNames) {
-        const match = propName.regexp.exec(prop);
-        if (!match) continue;
+      const setFunc = ({propName, match}, value) => {
         this.stackIndexes.push(match.slice(1));
         try {
           return this.setByPropertyName(target, propName, value, receiver);
         } finally {
           this.stackIndexes.pop();
         }
+      };
+      if (this.matchByName.has(prop)) {
+        return setFunc(this.matchByName.get(prop), value);
+      }
+      for(const propName of this.definedPropertyNames) {
+        const match = propName.regexp.exec(prop);
+        if (!match) continue;
+        this.matchByName.set(prop, {propName, match});
+        return setFunc({propName, match}, value);
       }
       throw new Error(`undefined property ${prop}`);
     } else {
