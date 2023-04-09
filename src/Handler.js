@@ -103,6 +103,20 @@ export class Handler {
 
   /**
    * 
+   * @param {number[]} indexes 
+   * @param {()=>{}} callback 
+   * @returns 
+   */
+  #pushIndexes(indexes, callback) {
+    this.#stackIndexes.push(indexes);
+    try {
+      return Reflect.apply(callback, this, []);
+    } finally {
+      this.#stackIndexes.pop();
+    }
+  }
+  /**
+   * 
    * @param {any} target 
    * @param {string} prop 
    * @param {Proxy} receiver 
@@ -113,24 +127,14 @@ export class Handler {
     if (prop === SYM_DIRECT_GET) {
       return (prop, indexes) => {
         if (this.#setOfDefinedProperties.has(prop)) {
-          this.#stackIndexes.push(indexes);
-          try {
-            return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
-          } finally {
-            this.#stackIndexes.pop();
-          }
+          return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, PropertyName.create(prop), receiver));
         }
         throw new Error(`undefined property ${prop}`);
       }
     } else if (prop === SYM_DIRECT_SET) {
       return (prop, indexes, value) => {
         if (this.#setOfDefinedProperties.has(prop)) {
-          this.#stackIndexes.push(indexes);
-          try {
-            return this.#setByPropertyName(target, PropertyName.create(prop), value, receiver);
-          } finally {
-            this.#stackIndexes.pop();
-          }
+          return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, PropertyName.create(prop), value, receiver));
         }
         throw new Error(`undefined property ${prop}`);
       }
@@ -141,12 +145,7 @@ export class Handler {
       return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
     }
     const getFunc = ({propName, match}) => {
-      this.#stackIndexes.push(match.slice(1));
-      try {
-        return this.#getByPropertyName(target, propName, receiver);
-      } finally {
-        this.#stackIndexes.pop();
-      }
+      return this.#pushIndexes(match.slice(1), () => this.#getByPropertyName(target, propName, receiver));
     };
     if (this.#matchByName.has(prop)) {
       return getFunc(this.#matchByName.get(prop));
@@ -172,12 +171,7 @@ export class Handler {
       return this.#setByPropertyName(target, PropertyName.create(prop), value, receiver);
     }
     const setFunc = ({propName, match}, value) => {
-      this.#stackIndexes.push(match.slice(1));
-      try {
-        return this.#setByPropertyName(target, propName, value, receiver);
-      } finally {
-        this.#stackIndexes.pop();
-      }
+      return this.#pushIndexes(match.slice(1), () => this.#setByPropertyName(target, propName, value, receiver));
     };
     if (this.#matchByName.has(prop)) {
       return setFunc(this.#matchByName.get(prop), value);
