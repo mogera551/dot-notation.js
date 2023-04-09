@@ -1,3 +1,4 @@
+import { PropertyName } from "./PropertyName.js";
 import { SYM_DIRECT } from "./Symbols.js";
 
 
@@ -6,6 +7,20 @@ const DELIMITER = ".";
 
 export default class Handler {
   stackIndexes = [];
+  definedProperties;
+  setOfDefinedProperties;
+  definedPropertyNames;
+
+
+  /**
+   * 
+   * @param {string[]} definedProperties 
+   */
+  constructor(definedProperties) {
+    this.definedProperties = definedProperties;
+    this.setOfDefinedProperties = definedProperties ? new Set(definedProperties) : undefined;
+    this.definedPropertyNames = definedProperties ? definedProperties.map(name => PropertyName.create(name)) : undefined;
+  }
 
   get lastIndexes() {
     return this.stackIndexes[this.stackIndexes.length - 1];
@@ -67,15 +82,65 @@ export default class Handler {
   /**
    * 
    * @param {any} target 
+   * @param {PropertyName} propName 
+   * @param {Proxy} receiver
+   * @returns {any}
+   */
+  getByPropertyName(target, propName, receiver) {
+    if (Reflect.has(target, propName.name, receiver)) {
+      return Reflect.get(target, propName.name, receiver);
+    }
+    const parentValue = this.getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+    const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+    return Reflect.get(parentValue, lastPathName);
+  }
+
+  /**
+   * 
+   * @param {any} target 
+   * @param {PropertyName} propName 
+   * @param {any} value
+   * @param {Proxy} receiver
+   * @returns {any}
+   */
+  setByPropertyName(target, propName, value, receiver) {
+    if (Reflect.has(target, propName.name, receiver)) {
+      Reflect.set(target, propName.name, value, receiver);
+      return true;
+    }
+    const parentValue = this.getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+    const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+    Reflect.set(parentValue, lastPathName, value);
+    return true;
+  }
+
+  /**
+   * 
+   * @param {any} target 
    * @param {string} prop 
    * @param {Proxy} receiver 
    * @returns {any}
    */
   get(target, prop, receiver) {
-    if (prop.includes(".")) {
-      return this.getByPathNames(target, prop.split("."), receiver);
+    if (this.definedPropertyNames) {
+      for(const propName of this.definedPropertyNames) {
+        const match = propName.regexp.exec(prop);
+        if (match) {
+          this.stackIndexes.push(match.slice(1));
+          try {
+            return this.getByPropertyName(target, propName, receiver);
+          } finally {
+            this.stackIndexes.pop();
+          }
+        }
+      }
+      throw new Error(`undefined property ${prop}`);
+    } else {
+      if (prop.includes(".")) {
+        return this.getByPathNames(target, prop.split("."), receiver);
+      }
+      return Reflect.get(target, prop, receiver);
     }
-    return Reflect.get(target, prop, receiver);
   }
 
   /**
@@ -97,9 +162,26 @@ export default class Handler {
    * @param {Proxy} receiver 
    */
   set(target, prop, value, receiver) {
-    if (prop.includes(".")) {
-      return this.setByPathNames(target, prop.split("."), value, receiver);
+    if (this.definedPropertyNames) {
+      for(const propName of this.definedPropertyNames) {
+        const match = propName.regexp.exec(prop);
+        if (match) {
+          this.stackIndexes.push(match.slice(1));
+          try {
+            return this.setByPropertyName(target, propName, value, receiver);
+          } finally {
+            this.stackIndexes.pop();
+          }
+        }
+      }
+      throw new Error(`undefined property ${prop}`);
+    } else {
+      if (prop.includes(".")) {
+        return this.setByPathNames(target, prop.split("."), value, receiver);
+      }
+      return Reflect.set(target, prop, value, receiver);
+  
     }
-   return Reflect.set(target, prop, value, receiver);
+
   }
 }
