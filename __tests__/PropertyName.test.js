@@ -1,4 +1,4 @@
-import {PropertyName} from "../src/PropertyName.js";
+import { PropertyName } from "../src/PropertyName.js";
 
 test('PropertyName ""', () => {
   const propertyName = new PropertyName("");

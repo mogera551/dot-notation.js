@@ -1,5 +1,4 @@
-const DELIMITER = ".";
-const WILDCARD = "*";
+import { WILDCARD, DELIMITER } from "./Const.js";
 
 export class PropertyName {
   /**
