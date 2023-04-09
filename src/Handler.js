@@ -109,6 +109,7 @@ export class Handler {
    * @returns {any}
    */
   get(target, prop, receiver) {
+    let match;
     if (prop === SYM_DIRECT_GET) {
       return (prop, indexes) => {
         if (this.#setOfDefinedProperties.has(prop)) {
@@ -121,8 +122,7 @@ export class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
-    }
-    if (prop === SYM_DIRECT_SET) {
+    } else if (prop === SYM_DIRECT_SET) {
       return (prop, indexes, value) => {
         if (this.#setOfDefinedProperties.has(prop)) {
           this.#stackIndexes.push(indexes);
@@ -134,6 +134,8 @@ export class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
+    } else if (match = /^\$([0-9]+)$/.exec(prop)) {
+      return this.lastIndexes?.[Number(match[1]) - 1] ?? undefined;
     }
     if (this.#setOfDefinedProperties.has(prop)) {
       return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
