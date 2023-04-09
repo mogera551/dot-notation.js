@@ -164,3 +164,48 @@ test('Handler defined property, class', () => {
   expect(Reflect.apply(getfunc, proxy, ["list.*.value", [0]])).toBe(250);
   expect(() => Reflect.apply(setfunc, proxy, ["list.*.value2", [0]])).toThrow();
 });
+
+test('Proxy defined property, class', () => {
+  const targetClass = class {
+    list = [
+      {value:100}, {value:200}, {value:300}
+    ];
+    get "list.*.double"() {
+      return this["list.*.value"] * 2;
+    }
+    set "list.*.double"(value) {
+      this["list.*.value"] = value / 2;
+    }
+    get "list.*.triple"() {
+      return this["list.*.value"] * 3;
+    }
+    set "list.*.triple"(value) {
+      this["list.*.value"] = value / 3;
+    }
+  } 
+  const handler = new Handler([
+    "list", "list.*", "list.*.value", "list.*.double", "list.*.triple"
+  ]);
+  const target = new targetClass;
+  const proxy = new Proxy(target, handler);
+
+  expect(proxy["list.0.double"]).toBe(200);
+  expect(proxy["list.1.double"]).toBe(400);
+  expect(proxy["list.2.double"]).toBe(600);
+
+  proxy["list.0.double"] = 100;
+  expect(proxy["list.0.double"]).toBe(100);
+
+  proxy["list.0.triple"] = 300;
+  expect(proxy["list.0.triple"]).toBe(300);
+
+  proxy["list.0.value"] = 100;
+  expect(proxy["list.0.value"]).toBe(100);
+
+  expect(proxy[SYM_DIRECT_GET]("list.*.value", [0])).toBe(100);
+  expect(() => proxy[SYM_DIRECT_GET]("list.*.value2", [0])).toThrow();
+
+  proxy[SYM_DIRECT_SET]("list.*.value", [0], 250);
+  expect(proxy[SYM_DIRECT_GET]("list.*.value", [0])).toBe(250);
+  expect(() => Rproxy[SYM_DIRECT_SET]("list.*.value2", [0], 250)).toThrow();
+});
