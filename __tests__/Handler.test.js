@@ -1,4 +1,5 @@
 import { Handler } from "../src/Handler.js";
+import { SYM_DIRECT_GET, SYM_DIRECT_SET } from "../src/Const.js"
 
 test('Handler stackIndexes', () => {
   const handler = new Handler([]);
@@ -148,4 +149,18 @@ test('Handler defined property, class', () => {
 
   handler.set(target, "list.0.triple", 300, proxy);
   expect(handler.get(target, "list.0.triple", proxy)).toBe(300);
+
+  handler.set(target, "list.0.value", 100, proxy);
+  expect(handler.get(target, "list.0.value", proxy)).toBe(100);
+
+  const getfunc = handler.get(target, SYM_DIRECT_GET, proxy);
+  expect(getfunc instanceof Function).toBe(true);
+  expect(Reflect.apply(getfunc, proxy, ["list.*.value", [0]])).toBe(100);
+  expect(() => Reflect.apply(getfunc, proxy, ["list.*.value2", [0]])).toThrow();
+
+  const setfunc = handler.get(target, SYM_DIRECT_SET, proxy);
+  expect(setfunc instanceof Function).toBe(true);
+  Reflect.apply(setfunc, proxy, ["list.*.value", [0], 250]);
+  expect(Reflect.apply(getfunc, proxy, ["list.*.value", [0]])).toBe(250);
+  expect(() => Reflect.apply(setfunc, proxy, ["list.*.value2", [0]])).toThrow();
 });

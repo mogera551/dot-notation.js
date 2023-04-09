@@ -1,5 +1,5 @@
 import { PropertyName } from "./PropertyName.js";
-import { WILDCARD, DELIMITER } from "./Const.js";
+import { WILDCARD, DELIMITER, SYM_DIRECT_GET, SYM_DIRECT_SET } from "./Const.js";
 
 /**
  * @typedef {{propName:PropertyName,match:RegExpMatchArray}} MatchProperty
@@ -109,6 +109,32 @@ export class Handler {
    * @returns {any}
    */
   get(target, prop, receiver) {
+    if (prop === SYM_DIRECT_GET) {
+      return (prop, indexes) => {
+        if (this.#setOfDefinedProperties.has(prop)) {
+          this.#stackIndexes.push(indexes);
+          try {
+            return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
+          } finally {
+            this.#stackIndexes.pop();
+          }
+        }
+        throw new Error(`undefined property ${prop}`);
+      }
+    }
+    if (prop === SYM_DIRECT_SET) {
+      return (prop, indexes, value) => {
+        if (this.#setOfDefinedProperties.has(prop)) {
+          this.#stackIndexes.push(indexes);
+          try {
+            return this.#setByPropertyName(target, PropertyName.create(prop), value, receiver);
+          } finally {
+            this.#stackIndexes.pop();
+          }
+        }
+        throw new Error(`undefined property ${prop}`);
+      }
+    }
     if (this.#setOfDefinedProperties.has(prop)) {
       return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
     }
