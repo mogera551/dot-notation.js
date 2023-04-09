@@ -11,7 +11,6 @@ export default class Handler {
   setOfDefinedProperties;
   definedPropertyNames;
 
-
   /**
    * 
    * @param {string[]} definedProperties 
@@ -123,15 +122,17 @@ export default class Handler {
    */
   get(target, prop, receiver) {
     if (this.definedPropertyNames) {
+      if (this.setOfDefinedProperties.has(prop)) {
+        return this.getByPropertyName(target, PropertyName.create(prop), receiver);
+      }
       for(const propName of this.definedPropertyNames) {
         const match = propName.regexp.exec(prop);
-        if (match) {
-          this.stackIndexes.push(match.slice(1));
-          try {
-            return this.getByPropertyName(target, propName, receiver);
-          } finally {
-            this.stackIndexes.pop();
-          }
+        if (!match) continue;
+        this.stackIndexes.push(match.slice(1));
+        try {
+          return this.getByPropertyName(target, propName, receiver);
+        } finally {
+          this.stackIndexes.pop();
         }
       }
       throw new Error(`undefined property ${prop}`);
@@ -163,15 +164,17 @@ export default class Handler {
    */
   set(target, prop, value, receiver) {
     if (this.definedPropertyNames) {
+      if (this.setOfDefinedProperties.has(prop)) {
+        return this.setByPropertyName(target, PropertyName.create(prop), value, receiver);
+      }
       for(const propName of this.definedPropertyNames) {
         const match = propName.regexp.exec(prop);
-        if (match) {
-          this.stackIndexes.push(match.slice(1));
-          try {
-            return this.setByPropertyName(target, propName, value, receiver);
-          } finally {
-            this.stackIndexes.pop();
-          }
+        if (!match) continue;
+        this.stackIndexes.push(match.slice(1));
+        try {
+          return this.setByPropertyName(target, propName, value, receiver);
+        } finally {
+          this.stackIndexes.pop();
         }
       }
       throw new Error(`undefined property ${prop}`);

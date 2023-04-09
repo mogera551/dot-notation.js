@@ -518,3 +518,27 @@ test('Handler defined property', () => {
   expect(handler.get(target, "ccc", proxy)).toEqual({ ddd:1111, eee:2222, fff:3333 });
 });
 
+test('Handler defined property', () => {
+  const target = {
+    "list": [
+      {value:100}, {value:200}, {value:300}
+    ],
+    get "list.*.double"() {
+      return this["list.*.value"] * 2;
+    },
+    set "list.*.double"(value) {
+      this["list.*.value"] = value / 2;
+    }
+  };
+  const handler = new Handler([
+    "list", "list.*", "list.*.value", "list.*.double"
+  ]);
+  const proxy = new Proxy(target, handler);
+
+  expect(handler.get(target, "list.0.double", proxy)).toBe(200);
+  expect(handler.get(target, "list.1.double", proxy)).toBe(400);
+  expect(handler.get(target, "list.2.double", proxy)).toBe(600);
+
+  handler.set(target, "list.0.double", 100, proxy);
+  expect(handler.get(target, "list.0.double", proxy)).toBe(100);
+});
