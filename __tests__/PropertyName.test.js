@@ -92,3 +92,25 @@ test('PropertyName.create "aaa"', () => {
   const propertyName2 = PropertyName.create("aaa");
   expect(propertyName2).toBe(propertyName);
 });
+
+test('findNearestWildcard', () => {
+  const propertyName = PropertyName.create("aaa.*.bbb.*.ccc");
+  const wildcardProperty = PropertyName.findNearestWildcard(propertyName);
+  expect(wildcardProperty.name).toBe("aaa.*.bbb.*");
+  const propertyName2 = PropertyName.create("aaa.*.bbb.*");
+  const wildcardProperty2 = PropertyName.findNearestWildcard(propertyName2);
+  expect(wildcardProperty2.name).toBe("aaa.*.bbb.*");
+  const propertyName3 = PropertyName.create("aaa.*.bbb.*.ccc.ddd.eee");
+  const wildcardProperty3 = PropertyName.findNearestWildcard(propertyName3);
+  expect(wildcardProperty3.name).toBe("aaa.*.bbb.*");
+  const propertyName4 = PropertyName.create("aaa.bbb.ccc.ddd.eee");
+  const wildcardProperty4 = PropertyName.findNearestWildcard(propertyName4);
+  expect(wildcardProperty4).toBe(undefined);
+  const propertyName5 = PropertyName.create("aaa");
+  const wildcardProperty5 = PropertyName.findNearestWildcard(propertyName5);
+  expect(wildcardProperty5).toBe(undefined);
+  const propertyName6 = PropertyName.create("aaa.*.bbb.*.ccc.ddd.eee");
+  const wildcardProperty6 = propertyName6.findNearestWildcard();
+  expect(wildcardProperty6.name).toBe("aaa.*.bbb.*");
+
+});

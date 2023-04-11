@@ -40,6 +40,21 @@ export class PropertyName {
     this.level = this.pathNames.filter(pathName => pathName === WILDCARD).length;
   }
 
+  findNearestWildcard() {
+    return PropertyName.findNearestWildcard(this);
+  }
+
+  /**
+   * 
+   * @param {PropertyName} propName 
+   * @returns {PropertyName}
+   */
+  static findNearestWildcard(propName) {
+    if (propName.lastPathName === WILDCARD) return propName;
+    if (propName.parentPath === "") return undefined;
+    return this.findNearestWildcard(PropertyName.create(propName.parentPath));
+  }
+
   /**
    * 
    * @param {string} name 

@@ -8,11 +8,15 @@ class Products {
     { name:"BBBBB", price:1500 },
     { name:"CCCCC", price:1800 },
   ];
+  diffAmount;
   get "list.*.price_with_tax"() {
     return this["list.*.price"] * (1 + this.tax);
   }
   get "sum"() {
     return this["@list.*.price"].reduce((sum, price) => sum + price);
+  }
+  changeAllPrice() {
+    this["@list.*.price"] = this["@list.*.price"].map(price => price + this.diffAmount);
   }
 }
 
