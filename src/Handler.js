@@ -75,9 +75,13 @@ export class Handler {
     if (Reflect.has(target, propName.name, receiver)) {
       value = Reflect.get(target, propName.name, receiver);
     } else {
-      const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
-      const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-      value = Reflect.get(parentValue, lastPathName);
+      if (propName.isPrimitive) {
+        value = Reflect.get(target, propName.privateName, receiver);
+      } else {
+        const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+        const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+        value = Reflect.get(parentValue, lastPathName);
+      }
     }
     return value;
   }
@@ -94,9 +98,13 @@ export class Handler {
     if (Reflect.has(target, propName.name, receiver)) {
       Reflect.set(target, propName.name, value, receiver);
     } else {
-      const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
-      const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-      Reflect.set(parentValue, lastPathName, value);
+      if (propName.isPrimitive) {
+        Reflect.set(target, propName.privateName, value, receiver);
+      } else {
+        const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+        const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+        Reflect.set(parentValue, lastPathName, value);
+      }
     }
     return true;
   }

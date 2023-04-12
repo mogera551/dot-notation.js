@@ -10,6 +10,8 @@ test('PropertyName ""', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^$");
   expect(propertyName.level).toBe(0);
+  expect(propertyName.isPrimitive).toBe(true);
+  expect(propertyName.privateName).toBe("_");
 });
 
 test('PropertyName "aaa"', () => {
@@ -22,6 +24,8 @@ test('PropertyName "aaa"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa$");
   expect(propertyName.level).toBe(0);
+  expect(propertyName.isPrimitive).toBe(true);
+  expect(propertyName.privateName).toBe("_aaa");
 });
 
 test('PropertyName "aaa.bbb"', () => {
@@ -34,6 +38,8 @@ test('PropertyName "aaa.bbb"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.bbb$");
   expect(propertyName.level).toBe(0);
+  expect(propertyName.isPrimitive).toBe(false);
+  expect(propertyName.privateName).toBe(undefined);
 });
 
 test('PropertyName "aaa.bbb.ccc"', () => {
@@ -46,6 +52,8 @@ test('PropertyName "aaa.bbb.ccc"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.bbb\\.ccc$");
   expect(propertyName.level).toBe(0);
+  expect(propertyName.isPrimitive).toBe(false);
+  expect(propertyName.privateName).toBe(undefined);
 });
 
 test('PropertyName "aaa.*"', () => {
@@ -58,6 +66,8 @@ test('PropertyName "aaa.*"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)$");
   expect(propertyName.level).toBe(1);
+  expect(propertyName.isPrimitive).toBe(false);
+  expect(propertyName.privateName).toBe(undefined);
 });
 
 test('PropertyName "aaa.*.ccc"', () => {
@@ -70,6 +80,8 @@ test('PropertyName "aaa.*.ccc"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)\\.ccc$");
   expect(propertyName.level).toBe(1);
+  expect(propertyName.isPrimitive).toBe(false);
+  expect(propertyName.privateName).toBe(undefined);
 });
 
 test('PropertyName "aaa.*.ccc.*"', () => {
@@ -82,6 +94,8 @@ test('PropertyName "aaa.*.ccc.*"', () => {
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)\\.ccc\\.([0-9a-zA-Z_]*)$");
   expect(propertyName.level).toBe(2);
+  expect(propertyName.isPrimitive).toBe(false);
+  expect(propertyName.privateName).toBe(undefined);
 });
 
 test('PropertyName.create "aaa"', () => {

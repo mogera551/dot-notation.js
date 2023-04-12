@@ -302,3 +302,18 @@ test('Handler set @property', () => {
   expect(() => handler.set(target, "@list2", [], proxy)).toThrow();
   handler.stackIndexes.pop();
 });
+
+test('Handler private access', () => {
+  const targetClass = class {
+    "_aaa" = 100;
+  } 
+  const handler = new Handler([
+    "aaa"
+  ]);
+  const target = new targetClass;
+  const proxy = new Proxy(target, handler);
+
+  expect(handler.get(target, "aaa", proxy)).toBe(100);
+  handler.set(target, "aaa", 200, proxy);
+  expect(handler.get(target, "aaa", proxy)).toBe(200);
+});

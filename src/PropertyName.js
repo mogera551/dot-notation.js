@@ -25,6 +25,14 @@ export class PropertyName {
    * @type {number}
    */
   level = 0;
+  /**
+   * @type {boolean}
+   */
+  isPrimitive;
+  /**
+   * @type {string}
+   */
+  privateName;
 
   /**
    * 
@@ -38,6 +46,8 @@ export class PropertyName {
     this.lastPathName = this.pathNames.at(-1);
     this.regexp = new RegExp("^" + name.replaceAll(".", "\\.").replaceAll("*", "([0-9a-zA-Z_]*)") + "$");
     this.level = this.pathNames.filter(pathName => pathName === WILDCARD).length;
+    this.isPrimitive = (this.pathNames.length === 1);
+    this.privateName = this.isPrimitive ? `_${this.name}` : undefined;
   }
 
   findNearestWildcard() {
