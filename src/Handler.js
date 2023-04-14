@@ -71,19 +71,12 @@ export class Handler {
    * @returns {any}
    */
   #getByPropertyName(target, { propName }, receiver) {
-    let value;
-    if (Reflect.has(target, propName.name, receiver)) {
-      value = Reflect.get(target, propName.name, receiver);
-    } else {
-      if (propName.isPrimitive) {
-        value = Reflect.get(target, propName.privateName, receiver);
-      } else {
-        const parentValue = this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
-        const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        value = Reflect.get(parentValue, lastPathName);
-      }
-    }
-    return value;
+    return Reflect.has(target, propName.name, receiver) ? Reflect.get(target, propName.name, receiver) :
+     propName.isPrimitive ? Reflect.get(target, propName.privateName, receiver) :
+     Reflect.get(
+      this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver),
+      (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName
+     );
   }
 
   /**
@@ -94,17 +87,12 @@ export class Handler {
    * @returns {boolean}
    */
   #setByPropertyName(target, { propName, value }, receiver) {
-    if (Reflect.has(target, propName.name, receiver)) {
-      Reflect.set(target, propName.name, value, receiver);
-    } else {
-      if (propName.isPrimitive) {
-        Reflect.set(target, propName.privateName, value, receiver);
-      } else {
-        const parentValue = this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
-        const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        Reflect.set(parentValue, lastPathName, value);
-      }
-    }
+    Reflect.has(target, propName.name, receiver) ? Reflect.set(target, propName.name, value, receiver) :
+    propName.isPrimitive ? Reflect.set(target, propName.privateName, value, receiver) :
+    Reflect.set(
+      this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver), 
+      (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName, 
+      value);
     return true;
   }
 
@@ -129,9 +117,8 @@ export class Handler {
    * @param {Proxy} receiver 
    * @returns {({}:PropertyAccess) => {any}  }
    */
-  #getFunc = (target, receiver) => ({propName, indexes}) => {
-    return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, { propName }, receiver));
-  }
+  #getFunc = (target, receiver) => ({propName, indexes}) => 
+    this.#pushIndexes(indexes, () => this.#getByPropertyName(target, { propName }, receiver));
 
   /**
    * 
@@ -139,9 +126,8 @@ export class Handler {
    * @param {Proxy} receiver 
    * @returns {({}:PropertyAccess, value:any) => {boolean}  }
    */
-  #setFunc = (target, receiver) => ({propName, indexes}, value) => {
-    return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, { propName, value }, receiver));
-  }
+  #setFunc = (target, receiver) => ({propName, indexes}, value) => 
+    this.#pushIndexes(indexes, () => this.#setByPropertyName(target, { propName, value }, receiver));
 
   /**
    * 
@@ -155,11 +141,7 @@ export class Handler {
     const wildcardProp = propName.findNearestWildcard();
     if (!wildcardProp) throw new Error(`not found wildcard path of '${propName.name}'`);
     const listProp = PropertyName.create(wildcardProp.parentPath);
-    const resultValues = [];
-    for(let i in getFunc({propName:listProp, indexes})) {
-      resultValues.push(getFunc({propName, indexes:indexes.concat(Number(i))}));
-    }
-    return resultValues;
+    return getFunc({propName:listProp, indexes}).map((value, index) => getFunc({propName, indexes:indexes.concat(index)}));
   }
 
   /**
@@ -177,6 +159,7 @@ export class Handler {
     const listProp = PropertyName.create(wildcardProp.parentPath);
     const listValues = getFunc({propName:listProp, indexes});
     if (wildcardProp.name === propName.name) {
+      // propName末尾が*の場合
       setFunc({propName:listProp, indexes}, values);
     } else {
       if (values.length !== listValues.length) throw new Error(`not match value count '${propName.name}'`);
