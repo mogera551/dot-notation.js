@@ -66,11 +66,11 @@ export class Handler {
   /**
    * 
    * @param {any} target 
-   * @param {PropertyName} propName 
+   * @param {{propName:PropertyName}}  
    * @param {Proxy} receiver
    * @returns {any}
    */
-  #getByPropertyName(target, propName, receiver) {
+  #getByPropertyName(target, { propName }, receiver) {
     let value;
     if (Reflect.has(target, propName.name, receiver)) {
       value = Reflect.get(target, propName.name, receiver);
@@ -78,7 +78,7 @@ export class Handler {
       if (propName.isPrimitive) {
         value = Reflect.get(target, propName.privateName, receiver);
       } else {
-        const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+        const parentValue = this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
         const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
         value = Reflect.get(parentValue, lastPathName);
       }
@@ -89,19 +89,18 @@ export class Handler {
   /**
    * 
    * @param {any} target 
-   * @param {PropertyName} propName 
-   * @param {any} value
+   * @param {{propName:PropertyName,value:any}}  
    * @param {Proxy} receiver
    * @returns {boolean}
    */
-  #setByPropertyName(target, propName, value, receiver) {
+  #setByPropertyName(target, { propName, value }, receiver) {
     if (Reflect.has(target, propName.name, receiver)) {
       Reflect.set(target, propName.name, value, receiver);
     } else {
       if (propName.isPrimitive) {
         Reflect.set(target, propName.privateName, value, receiver);
       } else {
-        const parentValue = this.#getByPropertyName(target, PropertyName.create(propName.parentPath), receiver);
+        const parentValue = this.#getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
         const lastPathName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
         Reflect.set(parentValue, lastPathName, value);
       }
@@ -131,7 +130,7 @@ export class Handler {
    * @returns {({}:PropertyAccess) => {any}  }
    */
   #getFunc = (target, receiver) => ({propName, indexes}) => {
-    return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, propName, receiver));
+    return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, { propName }, receiver));
   }
 
   /**
@@ -141,18 +140,17 @@ export class Handler {
    * @returns {({}:PropertyAccess, value:any) => {boolean}  }
    */
   #setFunc = (target, receiver) => ({propName, indexes}, value) => {
-    return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, propName, value, receiver));
+    return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, { propName, value }, receiver));
   }
 
   /**
    * 
    * @param {any} target
-   * @param {PropertyName} propName 
-   * @param {number[]} indexes 
+   * @param {{propName:PropertyName,indexes:number[]}} 
    * @param {Proxy} receiver
    * @returns {any[]}
    */
-  #getExpandLastLevel(target, propName, indexes, receiver) {
+  #getExpandLastLevel(target, { propName, indexes }, receiver) {
     const getFunc = this.#getFunc(target, receiver);
     const wildcardProp = propName.findNearestWildcard();
     if (!wildcardProp) throw new Error(`not found wildcard path of '${propName.name}'`);
@@ -167,13 +165,11 @@ export class Handler {
   /**
    * 
    * @param {any} target
-   * @param {PropertyName} propName 
-   * @param {number[]} indexes 
-   * @param {any[]} values
+   * @param {{propName:PropertyName,indexes:number[],values:any[]}}  
    * @param {Proxy} receiver
    * @returns {boolean}
    */
-  #setExpandLastLevel(target, propName, indexes, values, receiver) {
+  #setExpandLastLevel(target, { propName, indexes, values }, receiver) {
     const getFunc = this.#getFunc(target, receiver);
     const setFunc = this.#setFunc(target, receiver);
     const wildcardProp = propName.findNearestWildcard();
@@ -205,7 +201,7 @@ export class Handler {
       // プロパティとindexesを直接指定してgetする
       return (prop, indexes) => {
         if (this.#setOfDefinedProperties.has(prop)) {
-          return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, PropertyName.create(prop), receiver));
+          return this.#pushIndexes(indexes, () => this.#getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver));
         }
         throw new Error(`undefined property ${prop}`);
       }
@@ -213,7 +209,7 @@ export class Handler {
       // プロパティとindexesを直接指定してsetする
       return (prop, indexes, value) => {
         if (this.#setOfDefinedProperties.has(prop)) {
-          return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, PropertyName.create(prop), value, receiver));
+          return this.#pushIndexes(indexes, () => this.#setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver));
         }
         throw new Error(`undefined property ${prop}`);
       }
@@ -228,11 +224,11 @@ export class Handler {
       const propName = PropertyName.create(name);
       if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
       const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
-      return this.#getExpandLastLevel(target, propName, baseIndexes, receiver);
+      return this.#getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
     }
     if (this.#setOfDefinedProperties.has(prop)) {
       // 定義済みプロパティに一致
-      return this.#getByPropertyName(target, PropertyName.create(prop), receiver);
+      return this.#getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver);
     }
     if (this.#matchByName.has(prop)) {
       return getFunc(this.#matchByName.get(prop));
@@ -263,11 +259,11 @@ export class Handler {
       const propName = PropertyName.create(name);
       if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
       const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
-      return this.#setExpandLastLevel(target, propName, baseIndexes, value, receiver);
+      return this.#setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
     }
     if (this.#setOfDefinedProperties.has(prop)) {
       // 定義済みプロパティに一致
-      return this.#setByPropertyName(target, PropertyName.create(prop), value, receiver);
+      return this.#setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver);
     }
     if (this.#matchByName.has(prop)) {
       return setFunc(this.#matchByName.get(prop), value);
