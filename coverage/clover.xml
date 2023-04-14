@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1681508591539" clover="3.2.0">
-  <project timestamp="1681508591539" name="All files">
-    <metrics statements="115" coveredstatements="115" conditionals="74" coveredconditionals="74" methods="25" coveredmethods="25" elements="214" coveredelements="214" complexity="0" loc="115" ncloc="115" packages="1" files="3" classes="3"/>
+<coverage generated="1681512287439" clover="3.2.0">
+  <project timestamp="1681512287439" name="All files">
+    <metrics statements="115" coveredstatements="115" conditionals="74" coveredconditionals="74" methods="30" coveredmethods="30" elements="219" coveredelements="219" complexity="0" loc="115" ncloc="115" packages="1" files="3" classes="3"/>
     <file name="Const.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Const.js">
       <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <line num="2" count="2" type="stmt"/>
@@ -11,7 +11,7 @@
       <line num="6" count="2" type="stmt"/>
     </file>
     <file name="Handler.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Handler.js">
-      <metrics statements="88" coveredstatements="88" conditionals="66" coveredconditionals="66" methods="20" coveredmethods="20"/>
+      <metrics statements="88" coveredstatements="88" conditionals="66" coveredconditionals="66" methods="25" coveredmethods="25"/>
       <line num="12" count="12" type="stmt"/>
       <line num="31" count="12" type="cond" truecount="2" falsecount="0"/>
       <line num="32" count="11" type="stmt"/>
