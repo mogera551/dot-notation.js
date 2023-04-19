@@ -1,5 +1,5 @@
 import { PropertyName } from "./PropertyName.js";
-import { WILDCARD, DELIMITER, SYM_DIRECT_GET, SYM_DIRECT_SET } from "./Const.js";
+import { WILDCARD, DELIMITER, Symbols } from "./Const.js";
 
 /**
  * @typedef {{propName:PropertyName,indexes:number[]}} PropertyAccess
@@ -180,7 +180,7 @@ export class Handler {
   get(target, prop, receiver) {
     const getFunc = this.getFunc(target, receiver);
     let match;
-    if (prop === SYM_DIRECT_GET) {
+    if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
       return (prop, indexes) => {
         if (this.#setOfDefinedProperties.has(prop)) {
@@ -188,7 +188,7 @@ export class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
-    } else if (prop === SYM_DIRECT_SET) {
+    } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
       return (prop, indexes, value) => {
         if (this.#setOfDefinedProperties.has(prop)) {

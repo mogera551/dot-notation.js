@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1681512287439" clover="3.2.0">
-  <project timestamp="1681512287439" name="All files">
-    <metrics statements="115" coveredstatements="115" conditionals="74" coveredconditionals="74" methods="30" coveredmethods="30" elements="219" coveredelements="219" complexity="0" loc="115" ncloc="115" packages="1" files="3" classes="3"/>
+<coverage generated="1681942859153" clover="3.2.0">
+  <project timestamp="1681942859153" name="All files">
+    <metrics statements="116" coveredstatements="116" conditionals="74" coveredconditionals="74" methods="30" coveredmethods="30" elements="220" coveredelements="220" complexity="0" loc="116" ncloc="116" packages="1" files="3" classes="3"/>
     <file name="Const.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Const.js">
-      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <line num="2" count="2" type="stmt"/>
       <line num="3" count="2" type="stmt"/>
       <line num="4" count="2" type="stmt"/>
       <line num="5" count="2" type="stmt"/>
       <line num="6" count="2" type="stmt"/>
+      <line num="10" count="2" type="stmt"/>
     </file>
     <file name="Handler.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Handler.js">
       <metrics statements="88" coveredstatements="88" conditionals="66" coveredconditionals="66" methods="25" coveredmethods="25"/>

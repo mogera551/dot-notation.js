@@ -3,6 +3,13 @@ const DELIMITER = ".";
 const SYM_PREFIX = "dot-notation"; // + Math.trunc(Math.random() * 9999_9999);
 const SYM_DIRECT_GET = Symbol.for(SYM_PREFIX + ".direct_get");
 const SYM_DIRECT_SET = Symbol.for(SYM_PREFIX + ".direct_set");
+/**
+ * @enum {Symbol}
+ */
+const Symbols = {
+  directlyGet: SYM_DIRECT_GET,
+  directlySet: SYM_DIRECT_SET,
+};
 
 class PropertyName {
   /**
@@ -266,7 +273,7 @@ class Handler {
   get(target, prop, receiver) {
     const getFunc = this.getFunc(target, receiver);
     let match;
-    if (prop === SYM_DIRECT_GET) {
+    if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
       return (prop, indexes) => {
         if (this.#setOfDefinedProperties.has(prop)) {
@@ -274,7 +281,7 @@ class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
-    } else if (prop === SYM_DIRECT_SET) {
+    } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
       return (prop, indexes, value) => {
         if (this.#setOfDefinedProperties.has(prop)) {
@@ -349,4 +356,4 @@ class Handler {
   }
 }
 
-export { Handler, PropertyName, SYM_DIRECT_GET, SYM_DIRECT_SET };
+export { Handler, PropertyName, SYM_DIRECT_GET, SYM_DIRECT_SET, Symbols };
