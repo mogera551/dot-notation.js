@@ -162,7 +162,9 @@ class Handler {
     if (Reflect.has(target, propName.name)) {
       return Reflect.get(target, propName.name, receiver);
     } else {
-      const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+      if (propName.parentPath === "") return undefined;
+      const parentPropName = PropertyName.create(propName.parentPath);
+      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
       const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
       return Reflect.get(parent, lastName);
     }
@@ -176,10 +178,11 @@ class Handler {
    * @returns {boolean}
    */
   setByPropertyName(target, { propName, value }, receiver) {
-    if (Reflect.has(target, propName.name, receiver)) {
+    if (Reflect.has(target, propName.name)) {
       Reflect.set(target, propName.name, value, receiver);
     } else {
-      const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+      const parentPropName = PropertyName.create(propName.parentPath);
+      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
       const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
       Reflect.set(parent, lastName, value);
     }

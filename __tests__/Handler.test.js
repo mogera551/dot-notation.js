@@ -1,5 +1,6 @@
 import { Handler } from "../src/Handler.js";
 import { SYM_DIRECT_GET, SYM_DIRECT_SET } from "../src/Const.js"
+import { PropertyName } from "../src/PropertyName.js";
 
 test('Handler stackIndexes', () => {
   const handler = new Handler([]);
@@ -87,6 +88,11 @@ test('Handler defined property', () => {
   expect(handler.get(target, "bbb", proxy)).toEqual([1000,2000,3000,4000]);
   handler.set(target, "ccc", { ddd:1111, eee:2222, fff:3333 }, proxy);
   expect(handler.get(target, "ccc", proxy)).toEqual({ ddd:1111, eee:2222, fff:3333 });
+
+  expect(() => handler.get(target, "ggg", proxy)).toThrow();
+  expect(() => handler.get(target, "ccc.ggg", proxy)).toThrow();
+  expect(handler.getByPropertyName(target, { propName:PropertyName.create("ggg") }, proxy)).toBe(undefined);
+
 });
 
 test('Handler defined property', () => {
