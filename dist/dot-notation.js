@@ -359,4 +359,4 @@ class Handler {
   }
 }
 
-export { Handler, PropertyName, Symbols };
+export { Handler, PropertyName, RE_CONTEXT_INDEX, Symbols };

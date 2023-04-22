@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1682179803731" clover="3.2.0">
-  <project timestamp="1682179803731" name="All files">
+<coverage generated="1682180693209" clover="3.2.0">
+  <project timestamp="1682180693209" name="All files">
     <metrics statements="127" coveredstatements="127" conditionals="70" coveredconditionals="70" methods="30" coveredmethods="30" elements="227" coveredelements="227" complexity="0" loc="127" ncloc="127" packages="1" files="3" classes="3"/>
     <file name="Const.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Const.js">
       <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
