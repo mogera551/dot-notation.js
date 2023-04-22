@@ -3,6 +3,7 @@ const DELIMITER = ".";
 const SYM_PREFIX = "dot-notation"; // + Math.trunc(Math.random() * 9999_9999);
 const SYM_DIRECT_GET = Symbol.for(SYM_PREFIX + ".direct_get");
 const SYM_DIRECT_SET = Symbol.for(SYM_PREFIX + ".direct_set");
+
 /**
  * @enum {Symbol}
  */
@@ -10,6 +11,8 @@ const Symbols = {
   directlyGet: SYM_DIRECT_GET,
   directlySet: SYM_DIRECT_SET,
 };
+
+const RE_CONTEXT_INDEX = new RegExp(/^\$([0-9]+)$/);
 
 class PropertyName {
   /**
@@ -289,7 +292,7 @@ class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
-    } else if (match = /^\$([0-9]+)$/.exec(prop)) {
+    } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
       // $数字のプロパティ
       // indexesへのアクセス
       return this.lastIndexes?.[Number(match[1]) - 1] ?? undefined;
@@ -356,4 +359,4 @@ class Handler {
   }
 }
 
-export { Handler, PropertyName, SYM_DIRECT_GET, SYM_DIRECT_SET, Symbols };
+export { Handler, PropertyName, Symbols };

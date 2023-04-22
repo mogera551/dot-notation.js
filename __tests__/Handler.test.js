@@ -1,5 +1,5 @@
 import { Handler } from "../src/Handler.js";
-import { SYM_DIRECT_GET, SYM_DIRECT_SET } from "../src/Const.js"
+import { Symbols } from "../src/Const.js"
 import { PropertyName } from "../src/PropertyName.js";
 
 test('Handler stackIndexes', () => {
@@ -166,12 +166,12 @@ test('Handler defined property, class', () => {
   handler.set(target, "list.0.value", 100, proxy);
   expect(handler.get(target, "list.0.value", proxy)).toBe(100);
 
-  const getfunc = handler.get(target, SYM_DIRECT_GET, proxy);
+  const getfunc = handler.get(target, Symbols.directlyGet, proxy);
   expect(getfunc instanceof Function).toBe(true);
   expect(Reflect.apply(getfunc, proxy, ["list.*.value", [0]])).toBe(100);
   expect(() => Reflect.apply(getfunc, proxy, ["list.*.value2", [0]])).toThrow();
 
-  const setfunc = handler.get(target, SYM_DIRECT_SET, proxy);
+  const setfunc = handler.get(target, Symbols.directlySet, proxy);
   expect(setfunc instanceof Function).toBe(true);
   Reflect.apply(setfunc, proxy, ["list.*.value", [0], 250]);
   expect(Reflect.apply(getfunc, proxy, ["list.*.value", [0]])).toBe(250);
@@ -215,12 +215,12 @@ test('Proxy defined property, class', () => {
   proxy["list.0.value"] = 100;
   expect(proxy["list.0.value"]).toBe(100);
 
-  expect(proxy[SYM_DIRECT_GET]("list.*.value", [0])).toBe(100);
-  expect(() => proxy[SYM_DIRECT_GET]("list.*.value2", [0])).toThrow();
+  expect(proxy[Symbols.directlyGet]("list.*.value", [0])).toBe(100);
+  expect(() => proxy[Symbols.directlyGet]("list.*.value2", [0])).toThrow();
 
-  proxy[SYM_DIRECT_SET]("list.*.value", [0], 250);
-  expect(proxy[SYM_DIRECT_GET]("list.*.value", [0])).toBe(250);
-  expect(() => proxy[SYM_DIRECT_SET]("list.*.value2", [0], 250)).toThrow();
+  proxy[Symbols.directlySet]("list.*.value", [0], 250);
+  expect(proxy[Symbols.directlyGet]("list.*.value", [0])).toBe(250);
+  expect(() => proxy[Symbols.directlySet]("list.*.value2", [0], 250)).toThrow();
 });
 
 test('Handler get @property', () => {

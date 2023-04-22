@@ -1,5 +1,5 @@
 import { PropertyName } from "./PropertyName.js";
-import { WILDCARD, DELIMITER, Symbols } from "./Const.js";
+import { WILDCARD, DELIMITER, RE_CONTEXT_INDEX, Symbols } from "./Const.js";
 
 /**
  * @typedef {{propName:PropertyName,indexes:number[]}} PropertyAccess
@@ -201,7 +201,7 @@ export class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
-    } else if (match = /^\$([0-9]+)$/.exec(prop)) {
+    } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
       // $数字のプロパティ
       // indexesへのアクセス
       return this.lastIndexes?.[Number(match[1]) - 1] ?? undefined;
