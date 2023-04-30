@@ -19,6 +19,7 @@ test('PropertyName "aaa"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa" ]);
   expect(propertyName.parentPathNames).toEqual([]);
   expect(propertyName.parentPath).toBe("");
+  expect(propertyName.parentPaths).toEqual([]);
   expect(propertyName.lastPathName).toBe("aaa")
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa$");
@@ -32,6 +33,7 @@ test('PropertyName "aaa.bbb"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa", "bbb" ]);
   expect(propertyName.parentPathNames).toEqual([ "aaa" ]);
   expect(propertyName.parentPath).toBe("aaa");
+  expect(propertyName.parentPaths).toEqual(["aaa"]);
   expect(propertyName.lastPathName).toBe("bbb")
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.bbb$");
@@ -45,6 +47,7 @@ test('PropertyName "aaa.bbb.ccc"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa", "bbb", "ccc" ]);
   expect(propertyName.parentPathNames).toEqual([ "aaa", "bbb" ]);
   expect(propertyName.parentPath).toBe("aaa.bbb");
+  expect(propertyName.parentPaths).toEqual(["aaa", "aaa.bbb"]);
   expect(propertyName.lastPathName).toBe("ccc")
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.bbb\\.ccc$");
@@ -58,6 +61,7 @@ test('PropertyName "aaa.*"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa", "*" ]);
   expect(propertyName.parentPathNames).toEqual([ "aaa" ]);
   expect(propertyName.parentPath).toBe("aaa");
+  expect(propertyName.parentPaths).toEqual(["aaa"]);
   expect(propertyName.lastPathName).toBe("*")
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)$");
@@ -71,6 +75,7 @@ test('PropertyName "aaa.*.ccc"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa", "*", "ccc" ]);
   expect(propertyName.parentPathNames).toEqual([ "aaa", "*" ]);
   expect(propertyName.parentPath).toBe("aaa.*");
+  expect(propertyName.parentPaths).toEqual(["aaa", "aaa.*"]);
   expect(propertyName.lastPathName).toBe("ccc")
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)\\.ccc$");
@@ -84,7 +89,8 @@ test('PropertyName "aaa.*.ccc.*"', () => {
   expect(propertyName.pathNames).toEqual([ "aaa", "*", "ccc", "*" ]);
   expect(propertyName.parentPathNames).toEqual([ "aaa", "*", "ccc" ]);
   expect(propertyName.parentPath).toBe("aaa.*.ccc");
-  expect(propertyName.lastPathName).toBe("*")
+  expect(propertyName.parentPaths).toEqual(["aaa", "aaa.*", "aaa.*.ccc"]);
+  expect(propertyName.lastPathName).toBe("*");
   expect(propertyName.regexp instanceof RegExp).toBe(true);
   expect(propertyName.regexp.source).toBe("^aaa\\.([0-9a-zA-Z_]*)\\.ccc\\.([0-9a-zA-Z_]*)$");
   expect(propertyName.level).toBe(2);
