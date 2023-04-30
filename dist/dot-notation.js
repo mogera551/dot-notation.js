@@ -52,6 +52,10 @@ class PropertyName {
     this.name = name;
     this.pathNames = name.split(DELIMITER);
     this.parentPathNames = this.pathNames.slice(0, -1);
+    this.parentPaths = this.parentPathNames.reduce((paths, pathName) => { 
+      paths.push(paths.at(-1)?.concat(pathName) ?? [pathName]);
+      return paths;
+    }, []).map(paths => paths.join("."));
     this.parentPath = this.parentPathNames.join(DELIMITER);
     this.lastPathName = this.pathNames.at(-1);
     this.regexp = new RegExp("^" + name.replaceAll(".", "\\.").replaceAll("*", "([0-9a-zA-Z_]*)") + "$");
