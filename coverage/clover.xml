@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1682822790184" clover="3.2.0">
-  <project timestamp="1682822790184" name="All files">
-    <metrics statements="131" coveredstatements="131" conditionals="72" coveredconditionals="72" methods="32" coveredmethods="32" elements="235" coveredelements="235" complexity="0" loc="131" ncloc="131" packages="1" files="3" classes="3"/>
+<coverage generated="1682823589227" clover="3.2.0">
+  <project timestamp="1682823589227" name="All files">
+    <metrics statements="133" coveredstatements="133" conditionals="72" coveredconditionals="72" methods="32" coveredmethods="32" elements="237" coveredelements="237" complexity="0" loc="133" ncloc="133" packages="1" files="3" classes="3"/>
     <file name="Const.js" path="C:\Users\m.kikuzawa\git\dot-notation.js\src\Const.js">
       <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <line num="2" count="2" type="stmt"/>
@@ -115,32 +115,34 @@
       <line num="267" count="1" type="stmt"/>
     </file>
     <file name="PropertyName.js" path="C:\Users\m.kikuzawa\git\dot-notation.js\src\PropertyName.js">
-      <metrics statements="25" coveredstatements="25" conditionals="8" coveredconditionals="8" methods="7" coveredmethods="7"/>
+      <metrics statements="27" coveredstatements="27" conditionals="8" coveredconditionals="8" methods="7" coveredmethods="7"/>
       <line num="11" count="33" type="stmt"/>
       <line num="15" count="33" type="stmt"/>
-      <line num="27" count="33" type="stmt"/>
-      <line num="38" count="33" type="stmt"/>
-      <line num="39" count="33" type="stmt"/>
-      <line num="40" count="33" type="stmt"/>
-      <line num="41" count="33" type="stmt"/>
-      <line num="42" count="53" type="cond" truecount="2" falsecount="0"/>
-      <line num="43" count="53" type="stmt"/>
-      <line num="44" count="53" type="stmt"/>
-      <line num="45" count="33" type="stmt"/>
+      <line num="23" count="33" type="stmt"/>
+      <line num="35" count="33" type="stmt"/>
       <line num="46" count="33" type="stmt"/>
       <line num="47" count="33" type="stmt"/>
-      <line num="48" count="86" type="stmt"/>
+      <line num="48" count="33" type="stmt"/>
       <line num="49" count="33" type="stmt"/>
-      <line num="53" count="21" type="stmt"/>
-      <line num="62" count="45" type="cond" truecount="2" falsecount="0"/>
-      <line num="63" count="23" type="cond" truecount="2" falsecount="0"/>
-      <line num="64" count="19" type="stmt"/>
-      <line num="73" count="315" type="stmt"/>
-      <line num="74" count="315" type="cond" truecount="2" falsecount="0"/>
-      <line num="75" count="26" type="stmt"/>
-      <line num="76" count="26" type="stmt"/>
-      <line num="77" count="26" type="stmt"/>
-      <line num="82" count="2" type="stmt"/>
+      <line num="50" count="53" type="cond" truecount="2" falsecount="0"/>
+      <line num="51" count="53" type="stmt"/>
+      <line num="52" count="53" type="stmt"/>
+      <line num="53" count="33" type="stmt"/>
+      <line num="54" count="33" type="stmt"/>
+      <line num="55" count="33" type="stmt"/>
+      <line num="56" count="33" type="stmt"/>
+      <line num="57" count="86" type="stmt"/>
+      <line num="58" count="33" type="stmt"/>
+      <line num="62" count="21" type="stmt"/>
+      <line num="71" count="45" type="cond" truecount="2" falsecount="0"/>
+      <line num="72" count="23" type="cond" truecount="2" falsecount="0"/>
+      <line num="73" count="19" type="stmt"/>
+      <line num="82" count="315" type="stmt"/>
+      <line num="83" count="315" type="cond" truecount="2" falsecount="0"/>
+      <line num="84" count="26" type="stmt"/>
+      <line num="85" count="26" type="stmt"/>
+      <line num="86" count="26" type="stmt"/>
+      <line num="91" count="2" type="stmt"/>
     </file>
   </project>
 </coverage>

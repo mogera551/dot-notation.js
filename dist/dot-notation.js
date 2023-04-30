@@ -32,6 +32,14 @@ class PropertyName {
    */
   parentPath;
   /**
+   * @type {string[]}
+   */
+  parentPaths = [];
+  /**
+   * @type {Set<string>}
+   */
+  setOfParentPaths;
+  /**
    * @type {RegExp}
    */
   regexp;
@@ -56,6 +64,7 @@ class PropertyName {
       paths.push(paths.at(-1)?.concat(pathName) ?? [pathName]);
       return paths;
     }, []).map(paths => paths.join("."));
+    this.setOfParentPaths = new Set(this.parentPaths);
     this.parentPath = this.parentPathNames.join(DELIMITER);
     this.lastPathName = this.pathNames.at(-1);
     this.regexp = new RegExp("^" + name.replaceAll(".", "\\.").replaceAll("*", "([0-9a-zA-Z_]*)") + "$");
