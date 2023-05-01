@@ -201,6 +201,8 @@ export class Handler {
         }
         throw new Error(`undefined property ${prop}`);
       }
+    } else if (prop === Symbols.isSupportDotNotation) {
+      return true;
     } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
       // $数字のプロパティ
       // indexesへのアクセス

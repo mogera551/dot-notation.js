@@ -309,3 +309,7 @@ test('Handler set @property', () => {
   handler.stackIndexes.pop();
 });
 
+test("Proxy", () => {
+  const proxy = new Proxy({}, new Handler([]));
+  expect(proxy[Symbols.isSupportDotNotation]).toBe(true);
+})
