@@ -117,28 +117,9 @@ class Handler {
    */
   #stackIndexes = [];
   /**
-   * @type {Set<string>}
-   */
-  #setOfDefinedProperties;
-  /**
-   * @type {PropertyName[]}
-   */
-  #definedPropertyNames;
-  /**
    * @type {Map<string,PropertyAccess>}
    */
-  #matchByName;
-
-  /**
-   * 
-   * @param {string[]} definedProperties
-   */
-  constructor(definedProperties) {
-    if (definedProperties == null) throw new Error(`definedProperties is null`);
-    this.#setOfDefinedProperties = new Set(definedProperties);
-    this.#definedPropertyNames = definedProperties.map(name => PropertyName.create(name));
-    this.#matchByName = new Map;
-  }
+  #matchByName = new Map;
 
   get lastIndexes() {
     return this.#stackIndexes[this.#stackIndexes.length - 1];
@@ -146,20 +127,6 @@ class Handler {
 
   get stackIndexes() {
     return this.#stackIndexes;
-  }
-
-  /**
-   * @type {Set<string>}
-   */
-  get setOfDefinedProperties() {
-    return this.#setOfDefinedProperties;
-  }
-
-  /**
-   * @type {PropertyName[]}
-   */
-  get definedPropertyNames() {
-    return this.#definedPropertyNames;
   }
 
   /**
@@ -171,21 +138,46 @@ class Handler {
 
   /**
    * 
+   * @param {*} prop 
+   * @returns {PropertyAccess}
+   */
+  #parseProperty(prop) {
+    const indexes = [];
+    const patternPropElements = [];
+    for(const propElement of prop.split(".")) {
+      const index = Number(propElement);
+      if (isNaN(index)) {
+        patternPropElements.push(propElement);
+      } else {
+        indexes.push(index);
+        patternPropElements.push("*");
+      }
+    }
+    return { 
+      propName: PropertyName.create(patternPropElements.join(".")),
+      indexes
+    };
+  }
+  /**
+   * 
    * @param {any} target 
    * @param {{propName:PropertyName}}  
    * @param {Proxy} receiver
    * @returns {any}
    */
   getByPropertyName(target, { propName }, receiver) {
+    let value = undefined;
     if (Reflect.has(target, propName.name)) {
-      return Reflect.get(target, propName.name, receiver);
+      value = Reflect.get(target, propName.name, receiver);
     } else {
-      if (propName.parentPath === "") return undefined;
-      const parentPropName = PropertyName.create(propName.parentPath);
-      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-      return Reflect.get(parent, lastName);
+      if (propName.parentPath !== "") {
+        const parentPropName = PropertyName.create(propName.parentPath);
+        const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
+        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+        value = Reflect.get(parent, lastName);
+      }
     }
+    return value;
   }
 
   /**
@@ -196,15 +188,18 @@ class Handler {
    * @returns {boolean}
    */
   setByPropertyName(target, { propName, value }, receiver) {
+    let result = false;
     if (Reflect.has(target, propName.name)) {
-      Reflect.set(target, propName.name, value, receiver);
+      result = Reflect.set(target, propName.name, value, receiver);
     } else {
       const parentPropName = PropertyName.create(propName.parentPath);
       const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-      Reflect.set(parent, lastName, value);
+      if (typeof parent !== "undefined") {
+        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+        result = Reflect.set(parent, lastName, value);
+      }
     }
-    return true;
+    return result;
   }
 
   /**
@@ -290,54 +285,41 @@ class Handler {
    */
   get(target, prop, receiver) {
     const getFunc = this.getFunc(target, receiver);
+    const lastIndexes = this.lastIndexes;
     let match;
     if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
       return (prop, indexes) => {
-        if (this.#setOfDefinedProperties.has(prop)) {
-          return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver));
-        }
-        throw new Error(`undefined property ${prop}`);
+        return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver));
       }
     } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
       return (prop, indexes, value) => {
-        if (this.#setOfDefinedProperties.has(prop)) {
-          return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver));
-        }
-        throw new Error(`undefined property ${prop}`);
+        return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver));
       }
     } else if (prop === Symbols.isSupportDotNotation) {
       return true;
     } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
       // $数字のプロパティ
       // indexesへのアクセス
-      return this.lastIndexes?.[Number(match[1]) - 1] ?? undefined;
+      return lastIndexes?.[Number(match[1]) - 1] ?? undefined;
     //} else if (prop.at(0) === "@" && prop.at(1) === "@") {
     } else if (prop.at(0) === "@") {
       const name = prop.slice(1);
-      if (!this.#setOfDefinedProperties.has(name)) throw new Error(`undefined property ${name}`);
       const propName = PropertyName.create(name);
-      if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
-      const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
+      if (((lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
+      const baseIndexes = lastIndexes?.slice(0, propName.level - 1) ?? [];
       return this.getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
-    }
-    if (this.#setOfDefinedProperties.has(prop)) {
-      // 定義済みプロパティに一致
-      return this.getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver);
     }
     if (this.#matchByName.has(prop)) {
       return getFunc(this.#matchByName.get(prop));
     }
-    for(const propName of this.#definedPropertyNames) {
-      // 定義済みプロパティの正規表現に一致する場合、indexesを設定して値を取得
-      const match = propName.regexp.exec(prop);
-      if (!match) continue;
-      const indexes = match.slice(1);
-      this.#matchByName.set(prop, {propName, indexes});
-      return getFunc({propName, indexes});
+    const propAccess = this.#parseProperty(prop);
+    if (propAccess.propName.level === propAccess.indexes.length) {
+      this.#matchByName.set(prop, propAccess);
     }
-    throw new Error(`undefined property ${prop}`);
+    propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
+    return getFunc(propAccess);
   }
 
   /**
@@ -349,30 +331,24 @@ class Handler {
    */
   set(target, prop, value, receiver) {
     const setFunc = this.setFunc(target, receiver);
+    const lastIndexes = this.lastIndexes;
     if (prop.at(0) === "@") {
       const name = prop.slice(1);
-      if (!this.#setOfDefinedProperties.has(name)) throw new Error(`undefined property ${name}`);
       const propName = PropertyName.create(name);
       if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
       const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
       return this.setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
     }
-    if (this.#setOfDefinedProperties.has(prop)) {
-      // 定義済みプロパティに一致
-      return this.setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver);
-    }
     if (this.#matchByName.has(prop)) {
       return setFunc(this.#matchByName.get(prop), value);
     }
-    for(const propName of this.#definedPropertyNames) {
-      // 定義済みプロパティの正規表現に一致する場合、indexesを設定して値を設定
-      const match = propName.regexp.exec(prop);
-      if (!match) continue;
-      const indexes = match.slice(1);
-      this.#matchByName.set(prop, {propName, indexes});
-      return setFunc({propName, indexes}, value);
+    const propAccess = this.#parseProperty(prop);
+    if (propAccess.propName.level === propAccess.indexes.length) {
+      this.#matchByName.set(prop, propAccess);
     }
-    throw new Error(`undefined property ${prop}`);
+    this.#matchByName.set(prop, propAccess);
+    propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
+    return setFunc(propAccess, value);
   }
 }
 
