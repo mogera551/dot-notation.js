@@ -65,7 +65,8 @@ test('Handler defined property', () => {
   expect(handler.get(target, "ccc.ddd", proxy)).toBe(333);
   handler.set(target, "ccc.eee", 444, proxy);
   expect(handler.get(target, "ccc.eee", proxy)).toBe(444);
-  expect(handler.set(target, "AAA", 3, proxy)).toBe(false);
+  expect(handler.set(target, "AAA", 3, proxy)).toBe(true);
+  expect(handler.get(target, "AAA", proxy)).toBe(3);
 
   handler.set(target, "bbb", [1000,2000,3000,4000], proxy);
   expect(handler.get(target, "bbb", proxy)).toEqual([1000,2000,3000,4000]);
@@ -197,7 +198,10 @@ test('Proxy property, class', () => {
 
   proxy[Symbols.directlySet]("list.*.value", [0], 250);
   expect(proxy[Symbols.directlyGet]("list.*.value", [0])).toBe(250);
-  expect(proxy[Symbols.directlySet]("list.*.value2", [0], 250)).toBe(true);
+  expect(proxy[Symbols.directlySet]("list.*.value2", [0], 255)).toBe(true);
+  expect(proxy[Symbols.directlyGet]("list.*.value2", [0])).toBe(255);
+  expect(proxy[Symbols.directlySet]("list2.*.value2", [0], 350)).toBe(false);
+  expect(proxy[Symbols.directlyGet]("list2.*.value2", [0])).toBe(undefined);
 });
 
 test('Handler get @property', () => {

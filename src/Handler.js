@@ -45,8 +45,10 @@ export class Handler {
       if (propName.parentPath !== "") {
         const parentPropName = PropertyName.create(propName.parentPath);
         const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        value = Reflect.get(parent, lastName);
+        if (typeof parent !== "undefined") {
+          const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+          value = Reflect.get(parent, lastName);
+        }
       }
     }
     return value;
@@ -61,7 +63,7 @@ export class Handler {
    */
   setByPropertyName(target, { propName, value }, receiver) {
     let result = false;
-    if (Reflect.has(target, propName.name)) {
+    if (Reflect.has(target, propName.name) || propName.isPrimitive) {
       result = Reflect.set(target, propName.name, value, receiver);
     } else {
       const parentPropName = PropertyName.create(propName.parentPath);
