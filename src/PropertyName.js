@@ -89,4 +89,27 @@ export class PropertyName {
    * @type {Map<string,PropertyName>}
    */
   static propertyNameByName = new Map;
+
+  /**
+   * 
+   * @param {*} prop 
+   * @returns {PropertyAccess}
+   */
+  static parse(prop) {
+    const indexes = [];
+    const patternPropElements = [];
+    for(const propElement of prop.split(".")) {
+      const index = Number(propElement);
+      if (isNaN(index)) {
+        patternPropElements.push(propElement);
+      } else {
+        indexes.push(index);
+        patternPropElements.push("*");
+      }
+    }
+    return { 
+      propName: PropertyName.create(patternPropElements.join(".")),
+      indexes
+    };
+  }
 }

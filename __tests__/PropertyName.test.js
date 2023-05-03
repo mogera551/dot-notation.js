@@ -135,3 +135,46 @@ test('findNearestWildcard', () => {
   expect(wildcardProperty6.name).toBe("aaa.*.bbb.*");
 
 });
+
+test('parse', () => {
+  expect(PropertyName.parse("aaa")).toEqual({ 
+    propName:PropertyName.create("aaa"), 
+    indexes:[] 
+  });
+  expect(PropertyName.parse("aaa.bbb")).toEqual({ 
+    propName:PropertyName.create("aaa.bbb"), 
+    indexes:[] 
+  });
+  expect(PropertyName.parse("aaa.0")).toEqual({ 
+    propName:PropertyName.create("aaa.*"), 
+    indexes:[ 0 ] 
+  });
+  expect(PropertyName.parse("aaa.10")).toEqual({ 
+    propName:PropertyName.create("aaa.*"), 
+    indexes:[ 10 ] 
+  });
+  expect(PropertyName.parse("aaa.0.bbb")).toEqual({ 
+    propName:PropertyName.create("aaa.*.bbb"), 
+    indexes:[ 0 ] 
+  });
+  expect(PropertyName.parse("aaa.0.bbb.2")).toEqual({ 
+    propName:PropertyName.create("aaa.*.bbb.*"), 
+    indexes:[ 0, 2 ] 
+  });
+  expect(PropertyName.parse("aaa.0.bbb.2.ccc")).toEqual({ 
+    propName:PropertyName.create("aaa.*.bbb.*.ccc"), 
+    indexes:[ 0, 2 ] 
+  });
+  expect(PropertyName.parse("aaa.0.bbb.2.ccc.4")).toEqual({ 
+    propName:PropertyName.create("aaa.*.bbb.*.ccc.*"), 
+    indexes:[ 0, 2, 4 ] 
+  });
+  expect(PropertyName.parse("aaa.0.4")).toEqual({ 
+    propName:PropertyName.create("aaa.*.*"), 
+    indexes:[ 0, 4 ] 
+  });
+  expect(PropertyName.parse("aaa.0.4.8")).toEqual({ 
+    propName:PropertyName.create("aaa.*.*.*"), 
+    indexes:[ 0, 4, 8 ] 
+  });
+});

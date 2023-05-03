@@ -105,6 +105,29 @@ class PropertyName {
    * @type {Map<string,PropertyName>}
    */
   static propertyNameByName = new Map;
+
+  /**
+   * 
+   * @param {*} prop 
+   * @returns {PropertyAccess}
+   */
+  static parse(prop) {
+    const indexes = [];
+    const patternPropElements = [];
+    for(const propElement of prop.split(".")) {
+      const index = Number(propElement);
+      if (isNaN(index)) {
+        patternPropElements.push(propElement);
+      } else {
+        indexes.push(index);
+        patternPropElements.push("*");
+      }
+    }
+    return { 
+      propName: PropertyName.create(patternPropElements.join(".")),
+      indexes
+    };
+  }
 }
 
 /**
@@ -136,28 +159,6 @@ class Handler {
     return this.#matchByName;
   }
 
-  /**
-   * 
-   * @param {*} prop 
-   * @returns {PropertyAccess}
-   */
-  #parseProperty(prop) {
-    const indexes = [];
-    const patternPropElements = [];
-    for(const propElement of prop.split(".")) {
-      const index = Number(propElement);
-      if (isNaN(index)) {
-        patternPropElements.push(propElement);
-      } else {
-        indexes.push(index);
-        patternPropElements.push("*");
-      }
-    }
-    return { 
-      propName: PropertyName.create(patternPropElements.join(".")),
-      indexes
-    };
-  }
   /**
    * 
    * @param {any} target 
@@ -314,7 +315,7 @@ class Handler {
     if (this.#matchByName.has(prop)) {
       return getFunc(this.#matchByName.get(prop));
     }
-    const propAccess = this.#parseProperty(prop);
+    const propAccess = PropertyName.parse(prop);
     if (propAccess.propName.level === propAccess.indexes.length) {
       this.#matchByName.set(prop, propAccess);
     }
@@ -342,7 +343,7 @@ class Handler {
     if (this.#matchByName.has(prop)) {
       return setFunc(this.#matchByName.get(prop), value);
     }
-    const propAccess = this.#parseProperty(prop);
+    const propAccess = PropertyName.parse(prop);
     if (propAccess.propName.level === propAccess.indexes.length) {
       this.#matchByName.set(prop, propAccess);
     }
