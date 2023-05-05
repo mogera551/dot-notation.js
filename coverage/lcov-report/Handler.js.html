@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>106/106</span>
+                <span class='fraction'>110/110</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>21/21</span>
+                <span class='fraction'>23/23</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>94/94</span>
+                <span class='fraction'>96/96</span>
             </div>
         
             
@@ -295,7 +295,13 @@
 <a name='L230'></a><a href='#L230'>230</a>
 <a name='L231'></a><a href='#L231'>231</a>
 <a name='L232'></a><a href='#L232'>232</a>
-<a name='L233'></a><a href='#L233'>233</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -448,6 +454,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -463,14 +479,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">83x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">77x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">73x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">72x</span>
@@ -679,6 +691,16 @@ export class Handler {
     return true;
   }
   
+  [Symbols.directlyGet](target, {prop, indexes}, receiver) {
+    const propName = PropertyName.create(prop);
+    return this.pushIndexes(indexes, () =&gt; this.getByPropertyName(target, { propName }, receiver));
+  }
+&nbsp;
+  [Symbols.directlySet](target, {prop, indexes, value}, receiver) {
+    const propName = PropertyName.create(prop);
+    return this.pushIndexes(indexes, () =&gt; this.setByPropertyName(target, { propName, value }, receiver));
+  }
+&nbsp;
   /**
    * 
    * @param {any} target 
@@ -695,14 +717,10 @@ export class Handler {
     let match;
     if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
-      return (prop, indexes) =&gt; {
-        return this.pushIndexes(indexes, () =&gt; this.getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver));
-      }
+      return (prop, indexes) =&gt; Reflect.apply(this[Symbols.directlyGet], this, [target, { prop, indexes }, receiver])
     } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
-      return (prop, indexes, value) =&gt; {
-        return this.pushIndexes(indexes, () =&gt; this.setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver));
-      }
+      return (prop, indexes, value) =&gt; Reflect.apply(this[Symbols.directlySet], this, [target, { prop, indexes, value }, receiver])
     } else if (prop === Symbols.isSupportDotNotation) {
       return true;
     } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
@@ -766,7 +784,7 @@ export class Handler {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-05-05T00:12:35.271Z
+                at 2023-05-05T15:47:08.996Z
             </div>
         <script src="prettify.js"></script>
         <script>

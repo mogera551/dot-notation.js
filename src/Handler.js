@@ -150,6 +150,16 @@ export class Handler {
     return true;
   }
   
+  [Symbols.directlyGet](target, {prop, indexes}, receiver) {
+    const propName = PropertyName.create(prop);
+    return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
+  }
+
+  [Symbols.directlySet](target, {prop, indexes, value}, receiver) {
+    const propName = PropertyName.create(prop);
+    return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
+  }
+
   /**
    * 
    * @param {any} target 
@@ -166,14 +176,10 @@ export class Handler {
     let match;
     if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
-      return (prop, indexes) => {
-        return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName:PropertyName.create(prop) }, receiver));
-      }
+      return (prop, indexes) => Reflect.apply(this[Symbols.directlyGet], this, [target, { prop, indexes }, receiver])
     } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
-      return (prop, indexes, value) => {
-        return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName:PropertyName.create(prop), value }, receiver));
-      }
+      return (prop, indexes, value) => Reflect.apply(this[Symbols.directlySet], this, [target, { prop, indexes, value }, receiver])
     } else if (prop === Symbols.isSupportDotNotation) {
       return true;
     } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
