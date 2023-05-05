@@ -236,6 +236,13 @@ test('Handler get @property', () => {
   handler.stackIndexes.push([]);
   expect(() => handler.get(target, "@list2", proxy)).toThrow();
   handler.stackIndexes.pop();
+
+  expect(handler.get(target, "@@__", proxy)).toEqual(undefined);
+  expect(handler.get(target, "constructor", proxy)).toBe(targetClass);
+  handler.set(target, "@@__", 1, proxy);
+  handler.set(target, "constructor", targetClass, proxy);
+  expect(handler.get(target, "@@__", proxy)).toEqual(1);
+  expect(handler.get(target, "constructor", proxy)).toBe(targetClass);
 });
 
 test('Handler set @property', () => {

@@ -158,6 +158,9 @@ export class Handler {
    * @returns {any}
    */
   get(target, prop, receiver) {
+    if (typeof prop === "string" && (prop.startsWith("@@__") || prop === "constructor")) {
+      return Reflect.get(target, prop, receiver);
+    }
     const getFunc = this.getFunc(target, receiver);
     const lastIndexes = this.lastIndexes;
     let match;
@@ -204,6 +207,9 @@ export class Handler {
    * @param {Proxy} receiver 
    */
   set(target, prop, value, receiver) {
+    if (typeof prop === "string" && (prop.startsWith("@@__") || prop === "constructor")) {
+      return Reflect.set(target, prop, value, receiver);
+    }
     const setFunc = this.setFunc(target, receiver);
     const lastIndexes = this.lastIndexes;
     if (prop.at(0) === "@") {
