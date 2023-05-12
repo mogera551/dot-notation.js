@@ -68,9 +68,12 @@ export class PropertyName {
    * @returns {PropertyName}
    */
   static findNearestWildcard(propName) {
-    if (propName.lastPathName === WILDCARD) return propName;
-    if (propName.parentPath === "") return undefined;
-    return this.findNearestWildcard(PropertyName.create(propName.parentPath));
+    let curProp = propName;
+    while(true) {
+      if (curProp.lastPathName === WILDCARD) return curProp;
+      if (curProp.parentPath === "") return undefined;
+      curProp = PropertyName.create(curProp.parentPath);
+    }
   }
 
   /**
