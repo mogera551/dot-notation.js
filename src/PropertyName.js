@@ -56,6 +56,17 @@ export class PropertyName {
     this.regexp = new RegExp("^" + name.replaceAll(".", "\\.").replaceAll("*", "([0-9a-zA-Z_]*)") + "$");
     this.level = this.pathNames.filter(pathName => pathName === WILDCARD).length;
     this.isPrimitive = (this.pathNames.length === 1);
+    this.nearestWildcardName = undefined;
+    this.nearestWildcardParentName = undefined;
+    if (this.level > 0) {
+      for(let i = this.pathNames.length - 1; i >= 0; i--) {
+        if (this.pathNames[i] === WILDCARD) {
+          this.nearestWildcardName = this.pathNames.slice(0, i + 1).join(".");
+          this.nearestWildcardParentName = this.pathNames.slice(0, i).join(".");
+          break;
+        }
+      }
+    }
   }
 
   findNearestWildcard() {
