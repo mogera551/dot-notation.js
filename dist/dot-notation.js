@@ -305,7 +305,8 @@ class Handler {
    * @returns {any}
    */
   get(target, prop, receiver) {
-    if (typeof prop === "string" && (prop.startsWith("@@__") || prop === "constructor")) {
+    const isPropString = typeof prop === "string";
+    if (isPropString && (prop.startsWith("@@__") || prop === "constructor")) {
       return Reflect.get(target, prop, receiver);
     }
     const getFunc = this.getFunc(target, receiver);
@@ -321,27 +322,31 @@ class Handler {
         Reflect.apply(this[Symbols.directlySet], this, [target, { prop, indexes, value }, receiver]);
     } else if (prop === Symbols.isSupportDotNotation) {
       return true;
-    } else if (match = RE_CONTEXT_INDEX.exec(prop)) {
-      // $数字のプロパティ
-      // indexesへのアクセス
-      return lastIndexes?.[Number(match[1]) - 1] ?? undefined;
-    //} else if (prop.at(0) === "@" && prop.at(1) === "@") {
-    } else if (prop.at(0) === "@") {
-      const name = prop.slice(1);
-      const propName = PropertyName.create(name);
-      if (((lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
-      const baseIndexes = lastIndexes?.slice(0, propName.level - 1) ?? [];
-      return this.getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
+    } else if (isPropString) {
+      if (match = RE_CONTEXT_INDEX.exec(prop)) {
+        // $数字のプロパティ
+        // indexesへのアクセス
+        return lastIndexes?.[Number(match[1]) - 1] ?? undefined;
+      //} else if (prop.at(0) === "@" && prop.at(1) === "@") {
+      } else if (prop.at(0) === "@") {
+        const name = prop.slice(1);
+        const propName = PropertyName.create(name);
+        if (((lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
+        const baseIndexes = lastIndexes?.slice(0, propName.level - 1) ?? [];
+        return this.getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
+      }
+      if (this.#matchByName.has(prop)) {
+        return getFunc(this.#matchByName.get(prop));
+      }
+      const propAccess = PropertyName.parse(prop);
+      if (propAccess.propName.level === propAccess.indexes.length) {
+        this.#matchByName.set(prop, propAccess);
+      }
+      propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
+      return getFunc(propAccess);
+    } else {
+      return Reflect.get(target, prop, receiver);
     }
-    if (this.#matchByName.has(prop)) {
-      return getFunc(this.#matchByName.get(prop));
-    }
-    const propAccess = PropertyName.parse(prop);
-    if (propAccess.propName.level === propAccess.indexes.length) {
-      this.#matchByName.set(prop, propAccess);
-    }
-    propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
-    return getFunc(propAccess);
   }
 
   /**
@@ -352,29 +357,34 @@ class Handler {
    * @param {Proxy} receiver 
    */
   set(target, prop, value, receiver) {
-    if (typeof prop === "string" && (prop.startsWith("@@__") || prop === "constructor")) {
+    const isPropString = typeof prop === "string";
+    if (isPropString) {
+      if (prop.startsWith("@@__") || prop === "constructor") {
+        return Reflect.set(target, prop, value, receiver);
+      }
+      const setFunc = this.setFunc(target, receiver);
+      const lastIndexes = this.lastIndexes;
+      if (prop.at(0) === "@") {
+        const name = prop.slice(1);
+        const propName = PropertyName.create(name);
+        if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
+        const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
+        return this.setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
+      }
+      if (this.#matchByName.has(prop)) {
+        return setFunc(this.#matchByName.get(prop), value);
+      }
+      const propAccess = PropertyName.parse(prop);
+      if (propAccess.propName.level === propAccess.indexes.length) {
+        this.#matchByName.set(prop, propAccess);
+      }
+      this.#matchByName.set(prop, propAccess);
+      propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
+      return setFunc(propAccess, value);
+    } else {
       return Reflect.set(target, prop, value, receiver);
     }
-    const setFunc = this.setFunc(target, receiver);
-    const lastIndexes = this.lastIndexes;
-    if (prop.at(0) === "@") {
-      const name = prop.slice(1);
-      const propName = PropertyName.create(name);
-      if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
-      const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
-      return this.setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
-    }
-    if (this.#matchByName.has(prop)) {
-      return setFunc(this.#matchByName.get(prop), value);
-    }
-    const propAccess = PropertyName.parse(prop);
-    if (propAccess.propName.level === propAccess.indexes.length) {
-      this.#matchByName.set(prop, propAccess);
-    }
-    this.#matchByName.set(prop, propAccess);
-    propAccess.indexes.push(...lastIndexes?.slice(propAccess.indexes.length) ?? []);
-    return setFunc(propAccess, value);
-  }
+ }
 }
 
 export { Handler, PropertyName, RE_CONTEXT_INDEX, Symbols };

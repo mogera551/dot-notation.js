@@ -205,6 +205,7 @@ test('Proxy property, class', () => {
 });
 
 test('Handler get @property', () => {
+  const sym = Symbol.for("aaa");
   const targetClass = class {
     list = [
       { name:"aaa", value:100 }, 
@@ -215,7 +216,8 @@ test('Handler get @property', () => {
       [1,2,3 ],
       [11,22,33 ],
       [111,222,333 ],
-    ]
+    ];
+    [sym] = 100;
   } 
   const handler = new Handler();
   const target = new targetClass;
@@ -243,6 +245,10 @@ test('Handler get @property', () => {
   handler.set(target, "constructor", targetClass, proxy);
   expect(handler.get(target, "@@__", proxy)).toEqual(1);
   expect(handler.get(target, "constructor", proxy)).toBe(targetClass);
+
+  expect(handler.get(target, sym, proxy)).toEqual(100);
+  handler.set(target, sym, 200, proxy);
+  expect(handler.get(target, sym, proxy)).toEqual(200);
 });
 
 test('Handler set @property', () => {
