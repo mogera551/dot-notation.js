@@ -85,24 +85,6 @@ class PropertyName {
     }
   }
 
-  findNearestWildcard() {
-    return PropertyName.findNearestWildcard(this);
-  }
-
-  /**
-   * 
-   * @param {PropertyName} propName 
-   * @returns {PropertyName}
-   */
-  static findNearestWildcard(propName) {
-    let curProp = propName;
-    while(true) {
-      if (curProp.lastPathName === WILDCARD) return curProp;
-      if (curProp.parentPath === "") return undefined;
-      curProp = PropertyName.create(curProp.parentPath);
-    }
-  }
-
   /**
    * 
    * @param {string} name 
@@ -261,9 +243,8 @@ class Handler {
    */
   getExpandLastLevel(target, { propName, indexes }, receiver) {
     const getFunc = this.getFunc(target, receiver);
-    const wildcardProp = propName.findNearestWildcard();
-    if (!wildcardProp) throw new Error(`not found wildcard path of '${propName.name}'`);
-    const listProp = PropertyName.create(wildcardProp.parentPath);
+    if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
+    const listProp = PropertyName.create(propName.nearestWildcardParentName);
     return getFunc({propName:listProp, indexes}).map((value, index) => getFunc({propName, indexes:indexes.concat(index)}));
   }
 
@@ -277,15 +258,14 @@ class Handler {
   setExpandLastLevel(target, { propName, indexes, values }, receiver) {
     const getFunc = this.getFunc(target, receiver);
     const setFunc = this.setFunc(target, receiver);
-    const wildcardProp = propName.findNearestWildcard();
-    if (!wildcardProp) throw new Error(`not found wildcard path of '${propName.name}'`);
-    const listProp = PropertyName.create(wildcardProp.parentPath);
+    if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
+    const listProp = PropertyName.create(propName.nearestWildcardParentName);
     const listValues = getFunc({propName:listProp, indexes});
-    if (wildcardProp.name === propName.name) {
+    if (propName.nearestWildcardName === propName.name) {
       // propName末尾が*の場合
       setFunc({propName:listProp, indexes}, values);
     } else {
-      if (values.length !== listValues.length) throw new Error(`not match value count '${propName.name}'`);
+      if (values.length !== listValues.length) throw new Error(`not match array count '${propName.name}'`);
       for(let i in listValues) {
         setFunc({propName, indexes:indexes.concat(Number(i))}, values[i]);
       }

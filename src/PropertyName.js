@@ -69,24 +69,6 @@ export class PropertyName {
     }
   }
 
-  findNearestWildcard() {
-    return PropertyName.findNearestWildcard(this);
-  }
-
-  /**
-   * 
-   * @param {PropertyName} propName 
-   * @returns {PropertyName}
-   */
-  static findNearestWildcard(propName) {
-    let curProp = propName;
-    while(true) {
-      if (curProp.lastPathName === WILDCARD) return curProp;
-      if (curProp.parentPath === "") return undefined;
-      curProp = PropertyName.create(curProp.parentPath);
-    }
-  }
-
   /**
    * 
    * @param {string} name 
