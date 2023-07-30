@@ -270,14 +270,22 @@ test('Handler set @property', () => {
 
   handler.set(target, "@list.*.value", [101,201,301], proxy);
   expect(handler.get(target, "@list.*.value", proxy)).toEqual([101,201,301]);
-  handler.set(target, "@list.*.name", ["aaaa","bbbb","cccc"], proxy)
+  handler.set(target, "@list.*.value", 400, proxy);
+  expect(handler.get(target, "@list.*.value", proxy)).toEqual([400,400,400]);
+  handler.set(target, "@list.*.name", ["aaaa","bbbb","cccc"], proxy);
   expect(handler.get(target, "@list.*.name", proxy)).toEqual(["aaaa","bbbb","cccc"]);
+  handler.set(target, "@list.*.name", "dddd", proxy);
+  expect(handler.get(target, "@list.*.name", proxy)).toEqual(["dddd","dddd","dddd"]);
   expect(() => handler.set(target, "@list.*.value2", [100], proxy)).toThrow();
   expect(() => handler.set(target, "@list.*.value", [100], proxy)).toThrow();
   expect(() => handler.set(target, "@list.*.value", [100,200,300,400], proxy)).toThrow();
   handler.stackIndexes.push([1]);
   handler.set(target, "@list2.*.*", [1.1,2.2,3.3], proxy);
   expect(handler.get(target, "@list2.*.*", proxy)).toEqual([1.1,2.2,3.3]);
+  handler.stackIndexes.pop();
+  handler.stackIndexes.push([1]);
+  handler.set(target, "@list2.*.*", 4.4, proxy);
+  expect(handler.get(target, "@list2.*.*", proxy)).toEqual([4.4,4.4,4.4]);
   handler.stackIndexes.pop();
   handler.stackIndexes.push([2,0]);
   handler.set(target, "@list2.*.*", [1.11,2.22,3.33], proxy);

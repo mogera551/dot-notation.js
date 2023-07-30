@@ -261,13 +261,14 @@ class Handler {
     if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
     const listProp = PropertyName.create(propName.nearestWildcardParentName);
     const listValues = getFunc({propName:listProp, indexes});
+    const newValues = Array.isArray(values) ? values : [...Array(listValues.length)].map(v => values);
     if (propName.nearestWildcardName === propName.name) {
       // propName末尾が*の場合
-      setFunc({propName:listProp, indexes}, values);
+      setFunc({propName:listProp, indexes}, newValues);
     } else {
-      if (values.length !== listValues.length) throw new Error(`not match array count '${propName.name}'`);
+      if (newValues.length !== listValues.length) throw new Error(`not match array count '${propName.name}'`);
       for(let i in listValues) {
-        setFunc({propName, indexes:indexes.concat(Number(i))}, values[i]);
+        setFunc({propName, indexes:indexes.concat(Number(i))}, newValues[i]);
       }
     }
     return true;
