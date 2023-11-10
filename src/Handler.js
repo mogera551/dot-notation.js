@@ -217,11 +217,13 @@ export class Handler {
       const propAccess = PropertyName.parse(prop);
       if (propAccess.propName.level === propAccess.indexes.length) {
         this.#matchByName.set(prop, propAccess);
+        return getFunc(propAccess);
+      } else {
+        return getFunc({
+          propName:propAccess.propName,
+          indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
+        });
       }
-      return getFunc({
-        propName:propAccess.propName,
-        indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
-      });
     } else {
       return Reflect.get(target, prop, receiver);
     }
@@ -255,11 +257,13 @@ export class Handler {
       const propAccess = PropertyName.parse(prop);
       if (propAccess.propName.level === propAccess.indexes.length) {
         this.#matchByName.set(prop, propAccess);
+        return setFunc(propAccess, value);
+        } else {
+        return setFunc({
+          propName:propAccess.propName,
+          indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
+        }, value);
       }
-      return setFunc({
-        propName:propAccess.propName,
-        indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
-      }, value);
     } else {
       return Reflect.set(target, prop, value, receiver);
     }

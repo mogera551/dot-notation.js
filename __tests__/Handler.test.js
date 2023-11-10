@@ -79,7 +79,7 @@ test('Handler defined property', () => {
 
 });
 
-test('Handler property', () => {
+test('Handler object, accessor property', () => {
   const target = {
     "list": [
       {value:100}, {value:200}, {value:300}
@@ -111,7 +111,7 @@ test('Handler property', () => {
   expect(handler.get(target, "list.0.triple", proxy)).toBe(300);
 });
 
-test('Handler property, class', () => {
+test('Handler class, getFunc, setFunc', () => {
   const targetClass = class {
     list = [
       {value:100}, {value:200}, {value:300}
@@ -158,7 +158,7 @@ test('Handler property, class', () => {
   expect(Reflect.apply(setfunc, proxy, ["list.*.value2", [0]])).toBe(true);
 });
 
-test('Proxy property, class', () => {
+test('Proxy directlyGet, directlySet', () => {
   const targetClass = class {
     list = [
       {value:100}, {value:200}, {value:300}
@@ -305,6 +305,91 @@ test('Handler set @property', () => {
   handler.stackIndexes.push([]);
   expect(() => handler.set(target, "@list2", [], proxy)).toThrow();
   handler.stackIndexes.pop();
+});
+
+test('Handler array', () => {
+  const target = {
+    "aaa": [
+      [1,2,3],
+      [11,22,33],
+      [111,222,333],
+    ],
+  };
+  const handler = new Handler();
+  const proxy = new Proxy(target, handler);
+
+  expect(handler.get(target, "aaa", proxy)).toEqual([
+    [1,2,3],
+    [11,22,33],
+    [111,222,333],
+  ]);
+  expect(handler.get(target, "aaa.0", proxy)).toEqual([1,2,3]);
+  expect(handler.get(target, "aaa.1", proxy)).toEqual([11,22,33]);
+  expect(handler.get(target, "aaa.2", proxy)).toEqual([111,222,333]);
+  expect(handler.get(target, "aaa.0.0", proxy)).toBe(1);
+  expect(handler.get(target, "aaa.0.1", proxy)).toBe(2);
+  expect(handler.get(target, "aaa.0.2", proxy)).toBe(3);
+  expect(handler.get(target, "aaa.1.0", proxy)).toBe(11);
+  expect(handler.get(target, "aaa.1.1", proxy)).toBe(22);
+  expect(handler.get(target, "aaa.1.2", proxy)).toBe(33);
+  expect(handler.get(target, "aaa.2.0", proxy)).toBe(111);
+  expect(handler.get(target, "aaa.2.1", proxy)).toBe(222);
+  expect(handler.get(target, "aaa.2.2", proxy)).toBe(333);
+  expect(handler.get(target, "aaa.*.*", proxy)).toBe(undefined);
+  expect(handler.get(target, "aaa.0.*", proxy)).toBe(undefined);
+  handler.stackIndexes.push([1,2]);
+  expect(handler.get(target, "aaa.*.*", proxy)).toBe(33);
+  expect(handler.get(target, "aaa.0.*", proxy)).toBe(3);
+  expect(handler.get(target, "aaa.1.*", proxy)).toBe(33);
+  expect(handler.get(target, "aaa.2.*", proxy)).toBe(333);
+  handler.stackIndexes.push([]);
+  expect(handler.get(target, "aaa.*.*", proxy)).toBe(undefined);
+  expect(handler.get(target, "aaa.0.*", proxy)).toBe(undefined);
+  handler.stackIndexes.push([1]);
+  expect(handler.get(target, "aaa.*.*", proxy)).toBe(undefined);
+  expect(handler.get(target, "aaa.0.*", proxy)).toBe(undefined);
+
+  handler.stackIndexes.splice(0);
+  expect(handler.stackIndexes).toEqual([]);
+
+  handler.set(target, "aaa", [[1111,2222,3333], [11111,22222,33333], [111111,222222,333333]], proxy);
+  expect(handler.get(target, "aaa", proxy)).toEqual([[1111,2222,3333], [11111,22222,33333], [111111,222222,333333]]);
+  handler.set(target, "aaa.0", [1,2,3], proxy);
+  expect(handler.get(target, "aaa.0", proxy)).toEqual([1,2,3]);
+  handler.set(target, "aaa.1", [11,22,33], proxy);
+  expect(handler.get(target, "aaa.1", proxy)).toEqual([11,22,33]);
+  handler.set(target, "aaa.2", [111,222,333], proxy);
+  expect(handler.get(target, "aaa.2", proxy)).toEqual([111,222,333]);
+  handler.set(target, "aaa.0.0", 1111, proxy);
+  expect(handler.get(target, "aaa.0.0", proxy)).toBe(1111);
+  handler.set(target, "aaa.0.1", 2222, proxy);
+  expect(handler.get(target, "aaa.0.1", proxy)).toBe(2222);
+  handler.set(target, "aaa.0.2", 3333, proxy);
+  expect(handler.get(target, "aaa.0.2", proxy)).toBe(3333);
+  handler.set(target, "aaa.1.0", 11111, proxy);
+  expect(handler.get(target, "aaa.1.0", proxy)).toBe(11111);
+  handler.set(target, "aaa.1.1", 22222, proxy);
+  expect(handler.get(target, "aaa.1.1", proxy)).toBe(22222);
+  handler.set(target, "aaa.1.2", 33333, proxy);
+  expect(handler.get(target, "aaa.1.2", proxy)).toBe(33333);
+  handler.set(target, "aaa.2.0", 111111, proxy);
+  expect(handler.get(target, "aaa.2.0", proxy)).toBe(111111);
+  handler.set(target, "aaa.2.1", 222222, proxy);
+  expect(handler.get(target, "aaa.2.1", proxy)).toBe(222222);
+  handler.set(target, "aaa.2.2", 333333, proxy);
+  expect(handler.get(target, "aaa.2.2", proxy)).toBe(333333);
+  handler.set(target, "aaa.*.*", 0, proxy);
+  expect(handler.get(target, "aaa", proxy)).toEqual([[1111,2222,3333], [11111,22222,33333], [111111,222222,333333]]);
+
+  handler.stackIndexes.push([1,2]);
+  handler.set(target, "aaa.*.*", 33, proxy);
+  expect(handler.get(target, "aaa.1.2", proxy)).toBe(33);
+  handler.set(target, "aaa.0.*", 3, proxy);
+  expect(handler.get(target, "aaa.0.2", proxy)).toBe(3);
+  handler.set(target, "aaa.1.*", 31, proxy);
+  expect(handler.get(target, "aaa.1.2", proxy)).toBe(31);
+  handler.set(target, "aaa.2.*", 333, proxy);
+  expect(handler.get(target, "aaa.2.2", proxy)).toBe(333);
 });
 
 test("Proxy", () => {
