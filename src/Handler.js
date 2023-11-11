@@ -156,7 +156,7 @@ export class Handler {
    * @param {Proxy<>} receiver 
    * @returns {any}
    */
-  [Symbols.directlyGet](target, {prop, indexes}, receiver) {
+  directlyGet(target, {prop, indexes}, receiver) {
     const propName = PropertyName.create(prop);
     return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
   }
@@ -168,7 +168,7 @@ export class Handler {
    * @param {Proxy<>} receiver 
    * @returns {boolean}
    */
-  [Symbols.directlySet](target, {prop, indexes, value}, receiver) {
+  directlySet(target, {prop, indexes, value}, receiver) {
     const propName = PropertyName.create(prop);
     return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
   }
@@ -191,11 +191,11 @@ export class Handler {
     if (prop === Symbols.directlyGet) {
       // プロパティとindexesを直接指定してgetする
       return (prop, indexes) => 
-        Reflect.apply(this[Symbols.directlyGet], this, [target, { prop, indexes }, receiver]);
+        Reflect.apply(this.directlyGet, this, [target, { prop, indexes }, receiver]);
     } else if (prop === Symbols.directlySet) {
       // プロパティとindexesを直接指定してsetする
       return (prop, indexes, value) => 
-        Reflect.apply(this[Symbols.directlySet], this, [target, { prop, indexes, value }, receiver]);
+        Reflect.apply(this.directlySet, this, [target, { prop, indexes, value }, receiver]);
     } else if (prop === Symbols.isSupportDotNotation) {
       return true;
     } else if (isPropString) {
