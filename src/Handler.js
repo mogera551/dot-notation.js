@@ -47,7 +47,7 @@ export class Handler {
         const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
         if (typeof parent !== "undefined") {
           const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-          value = Reflect.get(parent, lastName);
+          value = parent[lastName];
         }
       }
     }
@@ -70,7 +70,8 @@ export class Handler {
       const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
       if (typeof parent !== "undefined") {
         const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        result = Reflect.set(parent, lastName, value);
+        parent[lastName] = value;
+        result = true;
       }
     }
     return result;
