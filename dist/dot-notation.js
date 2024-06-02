@@ -257,7 +257,7 @@ class Handler {
    * @param {()=>{}} callback 
    * @returns 
    */
-  pushIndexes(indexes, callback) {
+  #pushIndexes(indexes, callback) {
     this.#stackIndexes.push(indexes);
     try {
       return Reflect.apply(callback, this, []);
@@ -273,7 +273,7 @@ class Handler {
    * @returns {({}:PropertyAccess) => {any}  }
    */
   #getFunc = (target, receiver) => ({propName, indexes}) => 
-    this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
+    this.#pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
 
   /**
    * 
@@ -282,7 +282,7 @@ class Handler {
    * @returns {({}:PropertyAccess, value:any) => {boolean}  }
    */
   #setFunc = (target, receiver) => ({propName, indexes}, value) => 
-    this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
+    this.#pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
 
   /**
    * 
@@ -291,7 +291,7 @@ class Handler {
    * @param {Proxy} receiver
    * @returns {any[]}
    */
-  getExpandLastLevel(target, { propName, indexes }, receiver) {
+  #getExpandLastLevel(target, { propName, indexes }, receiver) {
     const getFunc = this.#getFunc(target, receiver);
     if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
     const listProp = PropertyName.create(propName.nearestWildcardParentName);
@@ -305,7 +305,7 @@ class Handler {
    * @param {Proxy} receiver
    * @returns {boolean}
    */
-  setExpandLastLevel(target, { propName, indexes, values }, receiver) {
+  #setExpandLastLevel(target, { propName, indexes, values }, receiver) {
     const getFunc = this.#getFunc(target, receiver);
     const setFunc = this.#setFunc(target, receiver);
     if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
@@ -333,7 +333,7 @@ class Handler {
    */
   directlyGet(target, {prop, indexes}, receiver) {
     const propName = PropertyName.create(prop);
-    return this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
+    return this.#pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
   }
 
   /**
@@ -345,7 +345,7 @@ class Handler {
    */
   directlySet(target, {prop, indexes, value}, receiver) {
     const propName = PropertyName.create(prop);
-    return this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
+    return this.#pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
   }
 
   /**
@@ -384,7 +384,7 @@ class Handler {
         const propName = PropertyName.create(name);
         if (((lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
         const baseIndexes = lastIndexes?.slice(0, propName.level - 1) ?? [];
-        return this.getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
+        return this.#getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
       }
       if (this.#matchByName.has(prop)) {
         return getFunc(this.#matchByName.get(prop));
@@ -424,7 +424,7 @@ class Handler {
         const propName = PropertyName.create(name);
         if (((this.lastIndexes?.length ?? 0) + 1) < propName.level) throw new Error(`array level not match`);
         const baseIndexes = this.lastIndexes?.slice(0, propName.level - 1) ?? [];
-        return this.setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
+        return this.#setExpandLastLevel(target, { propName, indexes:baseIndexes, values:value }, receiver);
       }
       if (this.#matchByName.has(prop)) {
         return setFunc(this.#matchByName.get(prop), value);
