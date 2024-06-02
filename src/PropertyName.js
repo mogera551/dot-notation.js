@@ -121,16 +121,19 @@ export class PropertyName {
    * @returns {PropertyName}
    */
   static create(name) {
-    const propertyName = this.propertyNameByName.get(name);
+    const propertyName = this.#propertyNameByName.get(name);
     if (typeof propertyName !== "undefined") return propertyName;
     const newPropertyName = new PropertyName(name);
-    this.propertyNameByName.set(name, newPropertyName);
+    this.#propertyNameByName.set(name, newPropertyName);
     return newPropertyName;
   }
   /**
    * @type {Map<string,PropertyName>}
    */
-  static propertyNameByName = new Map;
+  static #propertyNameByName = new Map;
+  static get propertyNameByName() {
+    return this.#propertyNameByName;
+  }
 
   /**
    * 

@@ -137,16 +137,19 @@ class PropertyName {
    * @returns {PropertyName}
    */
   static create(name) {
-    const propertyName = this.propertyNameByName.get(name);
+    const propertyName = this.#propertyNameByName.get(name);
     if (typeof propertyName !== "undefined") return propertyName;
     const newPropertyName = new PropertyName(name);
-    this.propertyNameByName.set(name, newPropertyName);
+    this.#propertyNameByName.set(name, newPropertyName);
     return newPropertyName;
   }
   /**
    * @type {Map<string,PropertyName>}
    */
-  static propertyNameByName = new Map;
+  static #propertyNameByName = new Map;
+  static get propertyNameByName() {
+    return this.#propertyNameByName;
+  }
 
   /**
    * 
@@ -269,7 +272,7 @@ class Handler {
    * @param {Proxy} receiver 
    * @returns {({}:PropertyAccess) => {any}  }
    */
-  getFunc = (target, receiver) => ({propName, indexes}) => 
+  #getFunc = (target, receiver) => ({propName, indexes}) => 
     this.pushIndexes(indexes, () => this.getByPropertyName(target, { propName }, receiver));
 
   /**
@@ -278,7 +281,7 @@ class Handler {
    * @param {Proxy} receiver 
    * @returns {({}:PropertyAccess, value:any) => {boolean}  }
    */
-  setFunc = (target, receiver) => ({propName, indexes}, value) => 
+  #setFunc = (target, receiver) => ({propName, indexes}, value) => 
     this.pushIndexes(indexes, () => this.setByPropertyName(target, { propName, value }, receiver));
 
   /**
@@ -289,7 +292,7 @@ class Handler {
    * @returns {any[]}
    */
   getExpandLastLevel(target, { propName, indexes }, receiver) {
-    const getFunc = this.getFunc(target, receiver);
+    const getFunc = this.#getFunc(target, receiver);
     if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
     const listProp = PropertyName.create(propName.nearestWildcardParentName);
     return getFunc({propName:listProp, indexes}).map((value, index) => getFunc({propName, indexes:indexes.concat(index)}));
@@ -303,8 +306,8 @@ class Handler {
    * @returns {boolean}
    */
   setExpandLastLevel(target, { propName, indexes, values }, receiver) {
-    const getFunc = this.getFunc(target, receiver);
-    const setFunc = this.setFunc(target, receiver);
+    const getFunc = this.#getFunc(target, receiver);
+    const setFunc = this.#setFunc(target, receiver);
     if (typeof propName.nearestWildcardName === "undefined") throw new Error(`not found wildcard path of '${propName.name}'`);
     const listProp = PropertyName.create(propName.nearestWildcardParentName);
     const listValues = getFunc({propName:listProp, indexes});
@@ -357,7 +360,7 @@ class Handler {
     if (isPropString && (prop.startsWith("@@__") || prop === "constructor")) {
       return Reflect.get(target, prop, receiver);
     }
-    const getFunc = this.getFunc(target, receiver);
+    const getFunc = this.#getFunc(target, receiver);
     const lastIndexes = this.lastIndexes;
     let match;
     if (prop === Symbols.directlyGet) {
@@ -414,7 +417,7 @@ class Handler {
       if (prop.startsWith("@@__") || prop === "constructor") {
         return Reflect.set(target, prop, value, receiver);
       }
-      const setFunc = this.setFunc(target, receiver);
+      const setFunc = this.#setFunc(target, receiver);
       const lastIndexes = this.lastIndexes;
       if (prop.at(0) === "@") {
         const name = prop.slice(1);
