@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1717806301452" clover="3.2.0">
-  <project timestamp="1717806301452" name="All files">
-    <metrics statements="159" coveredstatements="159" conditionals="87" coveredconditionals="87" methods="43" coveredmethods="43" elements="289" coveredelements="289" complexity="0" loc="159" ncloc="159" packages="1" files="3" classes="3"/>
+<coverage generated="1717806896045" clover="3.2.0">
+  <project timestamp="1717806896045" name="All files">
+    <metrics statements="160" coveredstatements="160" conditionals="87" coveredconditionals="87" methods="43" coveredmethods="43" elements="290" coveredelements="290" complexity="0" loc="160" ncloc="160" packages="1" files="3" classes="3"/>
     <file name="Const.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Const.js">
       <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <line num="2" count="2" type="stmt"/>
@@ -14,7 +14,7 @@
       <line num="18" count="2" type="stmt"/>
     </file>
     <file name="Handler.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\Handler.js">
-      <metrics statements="102" coveredstatements="102" conditionals="75" coveredconditionals="75" methods="24" coveredmethods="24"/>
+      <metrics statements="103" coveredstatements="103" conditionals="75" coveredconditionals="75" methods="24" coveredmethods="24"/>
       <line num="9" count="6" type="stmt"/>
       <line num="10" count="8" type="stmt"/>
       <line num="12" count="4" type="stmt"/>
@@ -89,34 +89,35 @@
       <line num="217" count="16" type="cond" truecount="4" falsecount="0"/>
       <line num="218" count="15" type="cond" truecount="2" falsecount="0"/>
       <line num="219" count="15" type="stmt"/>
-      <line num="221" count="93" type="cond" truecount="2" falsecount="0"/>
-      <line num="222" count="35" type="stmt"/>
-      <line num="224" count="58" type="stmt"/>
-      <line num="225" count="58" type="cond" truecount="2" falsecount="0"/>
-      <line num="226" count="33" type="stmt"/>
+      <line num="221" count="93" type="stmt"/>
+      <line num="222" count="93" type="cond" truecount="2" falsecount="0"/>
+      <line num="223" count="35" type="stmt"/>
+      <line num="225" count="58" type="stmt"/>
+      <line num="226" count="58" type="cond" truecount="2" falsecount="0"/>
       <line num="227" count="33" type="stmt"/>
-      <line num="229" count="25" type="stmt"/>
-      <line num="235" count="2" type="stmt"/>
-      <line num="247" count="58" type="stmt"/>
-      <line num="248" count="58" type="cond" truecount="2" falsecount="0"/>
-      <line num="249" count="57" type="cond" truecount="4" falsecount="0"/>
-      <line num="250" count="2" type="stmt"/>
-      <line num="252" count="55" type="stmt"/>
-      <line num="253" count="55" type="stmt"/>
-      <line num="254" count="55" type="cond" truecount="2" falsecount="0"/>
-      <line num="255" count="14" type="stmt"/>
-      <line num="256" count="14" type="stmt"/>
-      <line num="257" count="14" type="cond" truecount="4" falsecount="0"/>
-      <line num="258" count="13" type="cond" truecount="2" falsecount="0"/>
-      <line num="259" count="13" type="stmt"/>
-      <line num="261" count="41" type="cond" truecount="2" falsecount="0"/>
-      <line num="262" count="25" type="stmt"/>
-      <line num="264" count="16" type="stmt"/>
-      <line num="265" count="16" type="cond" truecount="2" falsecount="0"/>
-      <line num="266" count="5" type="stmt"/>
-      <line num="267" count="5" type="stmt"/>
-      <line num="269" count="11" type="stmt"/>
-      <line num="275" count="1" type="stmt"/>
+      <line num="228" count="33" type="stmt"/>
+      <line num="230" count="25" type="stmt"/>
+      <line num="238" count="2" type="stmt"/>
+      <line num="250" count="58" type="stmt"/>
+      <line num="251" count="58" type="cond" truecount="2" falsecount="0"/>
+      <line num="252" count="57" type="cond" truecount="4" falsecount="0"/>
+      <line num="253" count="2" type="stmt"/>
+      <line num="255" count="55" type="stmt"/>
+      <line num="256" count="55" type="stmt"/>
+      <line num="257" count="55" type="cond" truecount="2" falsecount="0"/>
+      <line num="258" count="14" type="stmt"/>
+      <line num="259" count="14" type="stmt"/>
+      <line num="260" count="14" type="cond" truecount="4" falsecount="0"/>
+      <line num="261" count="13" type="cond" truecount="2" falsecount="0"/>
+      <line num="262" count="13" type="stmt"/>
+      <line num="264" count="41" type="cond" truecount="2" falsecount="0"/>
+      <line num="265" count="25" type="stmt"/>
+      <line num="267" count="16" type="stmt"/>
+      <line num="268" count="16" type="cond" truecount="2" falsecount="0"/>
+      <line num="269" count="5" type="stmt"/>
+      <line num="270" count="5" type="stmt"/>
+      <line num="272" count="11" type="stmt"/>
+      <line num="278" count="1" type="stmt"/>
     </file>
     <file name="PropertyName.js" path="C:\Users\m.kikuzawa\Documents\git\dot-notation.js\src\PropertyName.js">
       <metrics statements="49" coveredstatements="49" conditionals="12" coveredconditionals="12" methods="19" coveredmethods="19"/>

@@ -392,19 +392,22 @@ class Handler {
         const baseIndexes = lastIndexes?.slice(0, propName.level - 1) ?? [];
         return this.#getExpandLastLevel(target, { propName, indexes:baseIndexes }, receiver);
       }
-      if (this.#matchByName.has(prop)) {
+      const propAccess = this.#matchByName.get(prop);
+      if (typeof propAccess !== "undefined") {
         return getFunc(this.#matchByName.get(prop));
-      }
-      const propAccess = PropertyName.parse(prop);
-      if (propAccess.propName.level === propAccess.indexes.length) {
-        this.#matchByName.set(prop, propAccess);
-        return getFunc(propAccess);
       } else {
-        return getFunc({
-          propName:propAccess.propName,
-          indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
-        });
+        const propAccess = PropertyName.parse(prop);
+        if (propAccess.propName.level === propAccess.indexes.length) {
+          this.#matchByName.set(prop, propAccess);
+          return getFunc(propAccess);
+        } else {
+          return getFunc({
+            propName:propAccess.propName,
+            indexes:propAccess.indexes.concat(lastIndexes?.slice(propAccess.indexes.length) ?? [])
+          });
+        }
       }
+
     } else {
       return Reflect.get(target, prop, receiver);
     }
