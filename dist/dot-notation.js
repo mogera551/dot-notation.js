@@ -228,20 +228,16 @@ class Handler {
    * @returns {any}
    */
   getByPropertyName(target, { propName }, receiver) {
-    let value = undefined;
-    if (Reflect.has(target, propName.name)) {
-      value = Reflect.get(target, propName.name, receiver);
-    } else {
-      if (propName.parentPath !== "") {
-        const parentPropName = PropertyName.create(propName.parentPath);
-        const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-        if (typeof parent !== "undefined") {
-          const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-          value = parent[lastName];
-        }
+    const value = Reflect.get(target, propName.name, receiver);
+    if (typeof value !== "undefined") return value;
+    if (propName.parentPath !== "") {
+      const parentPropName = PropertyName.create(propName.parentPath);
+      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
+      if (typeof parent !== "undefined") {
+        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+        return parent[lastName];
       }
     }
-    return value;
   }
 
   /**
