@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>120/120</span>
+                <span class='fraction'>119/119</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>103/103</span>
+                <span class='fraction'>99/99</span>
             </div>
         
             
@@ -336,14 +336,7 @@
 <a name='L271'></a><a href='#L271'>271</a>
 <a name='L272'></a><a href='#L272'>272</a>
 <a name='L273'></a><a href='#L273'>273</a>
-<a name='L274'></a><a href='#L274'>274</a>
-<a name='L275'></a><a href='#L275'>275</a>
-<a name='L276'></a><a href='#L276'>276</a>
-<a name='L277'></a><a href='#L277'>277</a>
-<a name='L278'></a><a href='#L278'>278</a>
-<a name='L279'></a><a href='#L279'>279</a>
-<a name='L280'></a><a href='#L280'>280</a>
-<a name='L281'></a><a href='#L281'>281</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L274'></a><a href='#L274'>274</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -404,7 +397,6 @@
 <span class="cline-any cline-yes">273x</span>
 <span class="cline-any cline-yes">268x</span>
 <span class="cline-any cline-yes">268x</span>
-<span class="cline-any cline-yes">268x</span>
 <span class="cline-any cline-yes">263x</span>
 <span class="cline-any cline-yes">263x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -417,21 +409,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">63x</span>
 <span class="cline-any cline-yes">63x</span>
 <span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">52x</span>
 <span class="cline-any cline-yes">52x</span>
-<span class="cline-any cline-yes">52x</span>
 <span class="cline-any cline-yes">50x</span>
 <span class="cline-any cline-yes">50x</span>
 <span class="cline-any cline-yes">50x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">63x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -681,14 +667,11 @@ export class Handler {
   getByPropertyName(target, { propName }, receiver) {
     const value = Reflect.get(target, propName.name, receiver);
     if (typeof value !== "undefined") return value;
-    if (propName.parentPath !== "") {
-      const parentPropName = PropertyName.create(propName.parentPath);
-      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      if (typeof parent !== "undefined") {
-        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        return parent[lastName];
-      }
-    }
+    if (propName.parentPath === "") return undefined;
+    const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+    if (typeof parent === "undefined") return undefined;
+    const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+    return parent[lastName];
   }
 &nbsp;
   /**
@@ -699,19 +682,15 @@ export class Handler {
    * @returns {boolean}
    */
   setByPropertyName(target, { propName, value }, receiver) {
-    let result = false;
     if (Reflect.has(target, propName.name) || propName.isPrimitive) {
-      result = Reflect.set(target, propName.name, value, receiver);
+      return Reflect.set(target, propName.name, value, receiver);
     } else {
-      const parentPropName = PropertyName.create(propName.parentPath);
-      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      if (typeof parent !== "undefined") {
-        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        parent[lastName] = value;
-        result = true;
-      }
+      const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+      if (typeof parent === "undefined") return false;
+      const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+      parent[lastName] = value;
+      return true;
     }
-    return result;
   }
 &nbsp;
   /**
@@ -910,7 +889,7 @@ export class Handler {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-06-08T00:34:56.031Z
+                at 2024-06-09T13:18:16.146Z
             </div>
         <script src="prettify.js"></script>
         <script>

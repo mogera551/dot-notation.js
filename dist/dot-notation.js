@@ -230,14 +230,11 @@ class Handler {
   getByPropertyName(target, { propName }, receiver) {
     const value = Reflect.get(target, propName.name, receiver);
     if (typeof value !== "undefined") return value;
-    if (propName.parentPath !== "") {
-      const parentPropName = PropertyName.create(propName.parentPath);
-      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      if (typeof parent !== "undefined") {
-        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        return parent[lastName];
-      }
-    }
+    if (propName.parentPath === "") return undefined;
+    const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+    if (typeof parent === "undefined") return undefined;
+    const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+    return parent[lastName];
   }
 
   /**
@@ -248,19 +245,15 @@ class Handler {
    * @returns {boolean}
    */
   setByPropertyName(target, { propName, value }, receiver) {
-    let result = false;
     if (Reflect.has(target, propName.name) || propName.isPrimitive) {
-      result = Reflect.set(target, propName.name, value, receiver);
+      return Reflect.set(target, propName.name, value, receiver);
     } else {
-      const parentPropName = PropertyName.create(propName.parentPath);
-      const parent = this.getByPropertyName(target, { propName:parentPropName }, receiver);
-      if (typeof parent !== "undefined") {
-        const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
-        parent[lastName] = value;
-        result = true;
-      }
+      const parent = this.getByPropertyName(target, { propName:PropertyName.create(propName.parentPath) }, receiver);
+      if (typeof parent === "undefined") return false;
+      const lastName = (propName.lastPathName === WILDCARD) ? this.lastIndexes[propName.level - 1] : propName.lastPathName;
+      parent[lastName] = value;
+      return true;
     }
-    return result;
   }
 
   /**
