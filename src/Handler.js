@@ -35,6 +35,15 @@ export class Handler {
     return this.#stackIndexes[this.#stackIndexes.length - 1];
   }
 
+  /** @type {string} */
+  #lastIndexesString;
+  get lastIndexesString() {
+    if (typeof this.#lastIndexesString === "undefined") {
+      this.#lastIndexesString = this.lastIndexes?.join(",");
+    }
+    return this.#lastIndexesString;
+  }
+
   get stackIndexes() {
     return this.#stackIndexes;
   }
@@ -89,6 +98,7 @@ export class Handler {
    * @returns 
    */
   #pushIndexes(indexes, callback) {
+    this.#lastIndexesString = undefined;
     this.#stackIndexes.push(indexes);
     try {
       return Reflect.apply(callback, this, []);

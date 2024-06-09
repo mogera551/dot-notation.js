@@ -9,22 +9,28 @@ test('Handler stackIndexes', () => {
   expect(handler.stackIndexes).toEqual([]);
   handler.stackIndexes.push([1]);
   expect(handler.lastIndexes).toEqual([1]);
+  expect(handler.lastIndexesString).toEqual("1");
   handler.stackIndexes.push([1,2]);
   expect(handler.lastIndexes).toEqual([1,2]);
+  expect(handler.lastIndexesString).toEqual("1.2");
   handler.stackIndexes.push([1,2,3]);
   expect(handler.lastIndexes).toEqual([1,2,3]);
+  expect(handler.lastIndexesString).toEqual("1.2.3");
   expect(handler.get(target, "$1", proxy)).toBe(1);
   expect(handler.get(target, "$2", proxy)).toBe(2);
   expect(handler.get(target, "$3", proxy)).toBe(3);
   handler.stackIndexes.pop();
   expect(handler.lastIndexes).toEqual([1,2]);
+  expect(handler.lastIndexesString).toEqual("1.2");
   expect(handler.get(target, "$1", proxy)).toBe(1);
   expect(handler.get(target, "$2", proxy)).toBe(2);
   expect(handler.get(target, "$3", proxy)).toBe(undefined);
   handler.stackIndexes.pop();
   expect(handler.lastIndexes).toEqual([1]);
+  expect(handler.lastIndexesString).toEqual("1");
   handler.stackIndexes.pop();
   expect(handler.lastIndexes).toBe(undefined);
+  expect(handler.lastIndexesString).toBe("");
   expect(handler.get(target, "$1", proxy)).toBe(undefined);
 });
 
